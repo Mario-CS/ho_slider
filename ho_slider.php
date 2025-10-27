@@ -247,9 +247,9 @@ class Ho_slider extends Module
                         'label' => $this->l('Descripción'),
                         'name' => 'description',
                         'lang' => true,
-                        'rows' => 4,
+                        'autoload_rte' => true,
                         'col' => 6,
-                        'hint' => $this->l('Texto descriptivo del slide (opcional)')
+                        'hint' => $this->l('Texto descriptivo del slide con formato enriquecido (opcional)')
                     ),
                     array(
                         'type' => 'text',
