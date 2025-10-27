@@ -23,29 +23,5 @@
 *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 */
-$sql = array();
 
-$sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'ho_slider` (
-    `id_slide` int(11) NOT NULL AUTO_INCREMENT,
-    `id_shop` int(11) NOT NULL DEFAULT "1",
-    `position` int(10) unsigned NOT NULL DEFAULT "0",
-    `active` tinyint(1) unsigned NOT NULL DEFAULT "1",
-    PRIMARY KEY  (`id_slide`)
-) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;';
-
-$sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'ho_slider_lang` (
-    `id_slide` int(11) NOT NULL,
-    `id_lang` int(11) NOT NULL,
-    `title` varchar(255) NOT NULL,
-    `description` text,
-    `legend` varchar(255),
-    `url` varchar(255),
-    `image` varchar(255) NOT NULL,
-    PRIMARY KEY (`id_slide`, `id_lang`)
-) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;';
-
-foreach ($sql as $query) {
-    if (Db::getInstance()->execute($query) == false) {
-        return false;
-    }
-}
+// Silence is golden

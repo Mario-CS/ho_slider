@@ -25,3 +25,53 @@
 * Don't forget to prefix your containers with your own identifier
 * to avoid any conflicts with others containers.
 */
+
+/* Estilos para el panel de administración */
+.ho-slider-admin .panel {
+    margin-bottom: 20px;
+}
+
+.ho-slider-admin .panel-heading {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.ho-slider-admin table img {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 2px;
+}
+
+.ho-slider-admin .btn-group {
+    display: flex;
+    gap: 5px;
+}
+
+.ho-slider-admin .alert {
+    margin-top: 15px;
+}
+
+/* Estilos para drag & drop */
+.ho-slide-card {
+    transition: all 0.3s ease;
+    cursor: move;
+}
+
+.ho-slide-card.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+}
+
+.ho-slide-card.drag-over {
+    border-top: 3px solid #25b9d7 !important;
+    margin-top: 5px;
+}
+
+.ho-slide-card .drag-handle {
+    cursor: move;
+    user-select: none;
+}
+
+.ho-slide-card .drag-handle:hover {
+    color: #25b9d7;
+}

@@ -1,4 +1,5 @@
-{*
+<?php
+/**
 * 2007-2025 PrestaShop
 *
 * NOTICE OF LICENSE
@@ -21,28 +22,6 @@
 *  @copyright 2007-2025 PrestaShop SA
 *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
-*}
+*/
 
-<div class="panel">
-	<h3><i class="icon icon-credit-card"></i> {l s='Slider home' mod='ho_slider'}</h3>
-	<p>
-		<strong>{l s='Here is my new generic module!' mod='ho_slider'}</strong><br />
-		{l s='Thanks to PrestaShop, now I have a great module.' mod='ho_slider'}<br />
-		{l s='I can configure it using the following configuration form.' mod='ho_slider'}
-	</p>
-	<br />
-	<p>
-		{l s='This module will boost your sales!' mod='ho_slider'}
-	</p>
-</div>
-
-<div class="panel">
-	<h3><i class="icon icon-tags"></i> {l s='Documentation' mod='ho_slider'}</h3>
-	<p>
-		&raquo; {l s='You can get a PDF documentation to configure this module' mod='ho_slider'} :
-		<ul>
-			<li><a href="#" target="_blank">{l s='English' mod='ho_slider'}</a></li>
-			<li><a href="#" target="_blank">{l s='French' mod='ho_slider'}</a></li>
-		</ul>
-	</p>
-</div>
+// Silence is golden
