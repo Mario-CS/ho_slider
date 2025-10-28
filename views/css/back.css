@@ -53,25 +53,187 @@
 
 /* Estilos para drag & drop */
 .ho-slide-card {
-    transition: all 0.3s ease;
-    cursor: move;
+    transition: all 0.2s ease;
+    cursor: grab;
+    position: relative;
+    flex-wrap: wrap; /* permite que el contenido se adapte en pantallas pequeñas */
+}
+
+.ho-slide-card:active {
+    cursor: grabbing;
 }
 
 .ho-slide-card.dragging {
-    opacity: 0.5;
-    transform: scale(0.95);
+    opacity: 0.4;
+    transform: scale(0.98);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    cursor: grabbing;
+    background: #f8f9fa !important;
 }
 
 .ho-slide-card.drag-over {
-    border-top: 3px solid #25b9d7 !important;
-    margin-top: 5px;
+    border: 2px dashed #25b9d7 !important;
+    background: #f0f8ff !important;
 }
 
 .ho-slide-card .drag-handle {
-    cursor: move;
+    cursor: grab;
     user-select: none;
+    transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .ho-slide-card .drag-handle:hover {
     color: #25b9d7;
+    transform: scale(1.1);
+}
+
+.ho-slide-card .drag-handle:active {
+    cursor: grabbing;
+}
+
+/* Indicador visual cuando se puede soltar */
+.ho-slide-card.drag-over::before {
+    content: "Soltar aquí";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(37, 185, 215, 0.9);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 14px;
+    pointer-events: none;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Animaciones para notificaciones */
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+/* Animación de spin para el icono de carga */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.icon-spin {
+    animation: spin 1s linear infinite;
+    display: inline-block;
+}
+
+/* Mejorar visibilidad del icono de arrastre */
+.ho-slide-card .drag-handle i {
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Efecto hover en toda la tarjeta cuando se arrastra */
+.ho-slide-card:hover:not(.dragging) {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Indicador de carga */
+.ho-slider-loading-indicator {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 20px 40px;
+    border-radius: 8px;
+    z-index: 9999;
+    font-size: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    display: none;
+}
+
+/* Mensaje de éxito */
+.ho-slider-success-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #5cb85c;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 4px;
+    z-index: 9999;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    animation: slideInRight 0.3s ease;
+}
+
+.ho-slider-success-message.slide-out {
+    animation: slideOutRight 0.3s ease;
+}
+
+.ho-slider-success-message i {
+    margin-right: 8px;
+}
+
+/* Evitar cortes de texto largos (descripciones, URLs y títulos) */
+.ho-slide-card h4 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ho-slide-card p {
+    overflow-wrap: break-word;
+    word-break: break-word; /* para URLs muy largas */
+}
+
+/* Permitir que los hijos flex puedan encoger y no desborden */
+.ho-slide-card > div {
+    min-width: 0;
+}
+
+/* Responsive del card en Back Office */
+@media (max-width: 1200px) {
+    .ho-slide-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    /* wrapper de imagen (2º hijo) */
+    .ho-slide-card > div:nth-child(2) {
+        margin-right: 0 !important;
+        margin-bottom: 12px;
+    }
+
+    .ho-slide-card img {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+
+    /* acciones (último hijo) */
+    .ho-slide-card > div:last-child {
+        margin-left: 0 !important;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
 }

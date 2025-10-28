@@ -98,6 +98,8 @@
     margin: 0 0 15px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     line-height: 1.2;
+    overflow-wrap: anywhere; /* evita desbordes de palabras muy largas */
+    word-break: break-word; /* fallback */
 }
 
 .ho-slide-description {
@@ -105,6 +107,8 @@
     margin: 0;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
     line-height: 1.4;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 /* Controles de navegación */

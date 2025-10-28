@@ -38,8 +38,8 @@
         data-module-url="{$current_index|escape:'html':'UTF-8'}&configure=ho_slider&token={$token|escape:'html':'UTF-8'}">
         {if $slides|@count > 0}
             {foreach $slides as $slide}
-                <div class="ho-slide-card" data-slide-id="{$slide.id_slide|intval}"
-                    style="display: flex; align-items: center; padding: 20px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 15px; background: #fff;">
+                <div class="ho-slide-card" data-slide-id="{$slide.id_slide|intval}" draggable="true"
+                    style="display: flex; align-items: center; padding: 20px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 15px; background: #fff; user-select: none;">
                     <!-- Icono de arrastre -->
                     <div class="drag-handle" style="margin-right: 20px; cursor: move; color: #ccc;">
                         <i class="icon-move" style="font-size: 24px;"></i>
@@ -50,17 +50,17 @@
                         {if $slide.image}
                             <img src="{$image_baseurl|escape:'html':'UTF-8'}{$slide.image|escape:'html':'UTF-8'}"
                                 alt="{$slide.title|escape:'html':'UTF-8'}"
-                                style="max-width: 350px; height: auto; border-radius: 4px; border: 1px solid #eee;">
+                                style="max-width: 260px; height: auto; border-radius: 4px; border: 1px solid #eee;">
                         {else}
                             <div
-                                style="width: 350px; height: 150px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; border-radius: 4px; border: 1px solid #eee;">
+                                style="width: 260px; height: 150px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; border-radius: 4px; border: 1px solid #eee;">
                                 <span class="text-muted">{l s='Sin imagen' mod='ho_slider'}</span>
                             </div>
                         {/if}
                     </div>
 
                     <!-- Información del slide -->
-                    <div style="flex: 1;">
+                    <div style="flex: 1; min-width: 220px;">
                         <h4 style="margin: 0 0 5px 0; font-weight: 600;">
                             #{$slide.id_slide|escape:'html':'UTF-8'} - {$slide.title|escape:'html':'UTF-8'}
                         </h4>
@@ -92,6 +92,11 @@
                         <a href="{$current_index|escape:'html':'UTF-8'}&updateSlide=1&id_slide={$slide.id_slide|intval}&token={$token|escape:'html':'UTF-8'}"
                             class="btn btn-default" title="{l s='Modificar' mod='ho_slider'}">
                             <i class="icon-edit"></i> {l s='Modificar' mod='ho_slider'}
+                        </a>
+
+                        <a href="{$current_index|escape:'html':'UTF-8'}&duplicateSlide=1&id_slide={$slide.id_slide|intval}&token={$token|escape:'html':'UTF-8'}"
+                            class="btn btn-default" title="{l s='Duplicar' mod='ho_slider'}">
+                            <i class="icon-copy"></i> {l s='Duplicar' mod='ho_slider'}
                         </a>
 
                         <a href="{$current_index|escape:'html':'UTF-8'}&deleteSlide=1&id_slide={$slide.id_slide|intval}&token={$token|escape:'html':'UTF-8'}"

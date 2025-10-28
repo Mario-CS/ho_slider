@@ -126,6 +126,8 @@ class Ho_slider extends Module
             // La función toggleStatus hace redirect, no llegará aquí
         } elseif (Tools::isSubmit('submitSettings')) {
             $output .= $this->postProcessSettings();
+        } elseif (Tools::isSubmit('duplicateSlide')) {
+            $output .= $this->duplicateSlide();
         }
 
         // Si se solicita añadir o editar, mostrar solo el formulario
@@ -339,27 +341,43 @@ class Ho_slider extends Module
         $helper->show_toolbar = false;
         
         // Importante: establecer los idiomas disponibles
-        $helper->languages = Language::getLanguages(false);
+        $languages = Language::getLanguages(false);
+        $helper->languages = $languages;
         $helper->id_language = $this->context->language->id;
+        
+        // Configurar el idioma por defecto para evitar el error "is_default"
+        foreach ($languages as &$language) {
+            $language['is_default'] = ($language['id_lang'] == $helper->default_form_language) ? 1 : 0;
+        }
+        unset($language);
+        $helper->languages = $languages;
 
         // Valores del formulario
+        $helper->fields_value = array(
+            'active' => $idSlide ? $slide->active : 1
+        );
+        
         if ($idSlide) {
-            $helper->fields_value = array(
-                'id_slide' => $idSlide,
-                'active' => $slide->active
-            );
+            $helper->fields_value['id_slide'] = $idSlide;
+        }
+        
+        // Inicializar campos multiidioma para todos los idiomas
+        foreach (Language::getLanguages(false) as $lang) {
+            $idLang = $lang['id_lang'];
             
-            // Campos multiidioma
-            foreach (Language::getLanguages(false) as $lang) {
-                $helper->fields_value['title'][$lang['id_lang']] = $slide->title[$lang['id_lang']];
-                $helper->fields_value['description'][$lang['id_lang']] = $slide->description[$lang['id_lang']];
-                $helper->fields_value['url'][$lang['id_lang']] = $slide->url[$lang['id_lang']];
-                $helper->fields_value['legend'][$lang['id_lang']] = $slide->legend[$lang['id_lang']];
+            if ($idSlide && isset($slide->title[$idLang])) {
+                // Si estamos editando, usar valores existentes
+                $helper->fields_value['title'][$idLang] = $slide->title[$idLang];
+                $helper->fields_value['description'][$idLang] = $slide->description[$idLang];
+                $helper->fields_value['url'][$idLang] = $slide->url[$idLang];
+                $helper->fields_value['legend'][$idLang] = $slide->legend[$idLang];
+            } else {
+                // Si es nuevo, inicializar con valores vacíos
+                $helper->fields_value['title'][$idLang] = '';
+                $helper->fields_value['description'][$idLang] = '';
+                $helper->fields_value['url'][$idLang] = '';
+                $helper->fields_value['legend'][$idLang] = '';
             }
-        } else {
-            $helper->fields_value = array(
-                'active' => 1
-            );
         }
 
         // Campo oculto para el ID
@@ -371,9 +389,72 @@ class Ho_slider extends Module
         }
 
         $formHtml = $helper->generateForm(array($fields_form));
-        
+
         // Envolver el formulario con un div con ID para hacer scroll
         return '<div id="add_slide_form">' . $formHtml . '</div>';
+    }
+
+    /**
+     * Duplicar un slide existente
+     */
+    protected function duplicateSlide()
+    {
+        $idSlide = (int)Tools::getValue('id_slide');
+        if (!$idSlide) {
+            return $this->displayError($this->l('ID de slide inválido'));
+        }
+
+        $original = new HoSlide($idSlide);
+        if (!Validate::isLoadedObject($original)) {
+            return $this->displayError($this->l('Slide no encontrado'));
+        }
+
+        $new = new HoSlide();
+        $new->id_shop = (int)$this->context->shop->id;
+        $new->position = HoSlide::getNextPosition($this->context->shop->id);
+        // Crear duplicado inactivo por defecto para revisión
+        $new->active = 0;
+
+        $languages = Language::getLanguages(false);
+        $uploadDir = _PS_ROOT_DIR_ . '/img/ho_slider/';
+
+        // Determinar nombre de imagen origen (usar cualquier idioma que la tenga)
+        $sourceImage = '';
+        foreach ($languages as $lang) {
+            $idLang = (int)$lang['id_lang'];
+            if (!empty($original->image[$idLang])) {
+                $sourceImage = $original->image[$idLang];
+                break;
+            }
+        }
+
+        $newFilename = '';
+        if ($sourceImage && file_exists($uploadDir . $sourceImage)) {
+            $ext = pathinfo($sourceImage, PATHINFO_EXTENSION);
+            $newFilename = uniqid('slide_') . '.' . $ext;
+            if (!@copy($uploadDir . $sourceImage, $uploadDir . $newFilename)) {
+                // Si no se pudo copiar, mantén referencia a la misma imagen como fallback
+                $newFilename = $sourceImage;
+            }
+        }
+
+        foreach ($languages as $lang) {
+            $idLang = (int)$lang['id_lang'];
+            // Añadir sufijo " (copia)" al título, respetando el límite de 255 chars
+            $newTitle = (string)$original->title[$idLang];
+            $newTitle = Tools::substr($newTitle . ' (copia)', 0, 255);
+            $new->title[$idLang] = $newTitle;
+            $new->description[$idLang] = (string)$original->description[$idLang];
+            $new->url[$idLang] = (string)$original->url[$idLang];
+            $new->legend[$idLang] = (string)$original->legend[$idLang];
+            $new->image[$idLang] = $newFilename ?: '';
+        }
+
+        if ($new->save()) {
+            Tools::redirectAdmin(AdminController::$currentIndex . '&configure=' . $this->name . '&conf=3&token=' . Tools::getAdminTokenLite('AdminModules'));
+        }
+
+        return $this->displayError($this->l('No se pudo duplicar el slide'));
     }
 
     /**

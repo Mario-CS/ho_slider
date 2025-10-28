@@ -28,10 +28,16 @@
 
 document.addEventListener('DOMContentLoaded', function () {
     initSlideDragAndDrop();
+    console.log('HO Slider: Sistema de drag & drop inicializado');
 });
 
 function initSlideDragAndDrop() {
     const slides = document.querySelectorAll('.ho-slide-card');
+
+    if (slides.length === 0) {
+        console.log('HO Slider: No hay slides para ordenar');
+        return;
+    }
 
     slides.forEach(slide => {
         // Hacer la tarjeta draggable
@@ -41,18 +47,26 @@ function initSlideDragAndDrop() {
         slide.addEventListener('dragstart', handleDragStart);
         slide.addEventListener('dragend', handleDragEnd);
         slide.addEventListener('dragover', handleDragOver);
+        slide.addEventListener('dragenter', handleDragEnter);
         slide.addEventListener('drop', handleDrop);
         slide.addEventListener('dragleave', handleDragLeave);
     });
+
+    console.log(`HO Slider: ${slides.length} slides configurados para drag & drop`);
 }
 
 let draggedElement = null;
+let sourceIndex = null;
 
 function handleDragStart(e) {
     draggedElement = this;
+    sourceIndex = getElementIndex(this);
+
     this.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/html', this.innerHTML);
+
+    console.log('Drag iniciado desde posición:', sourceIndex + 1);
 }
 
 function handleDragEnd(e) {
@@ -63,10 +77,18 @@ function handleDragEnd(e) {
         slide.classList.remove('drag-over');
     });
 
-    // Actualizar posiciones en el servidor al terminar
-    updateSlidePositions();
+    const newIndex = getElementIndex(draggedElement);
+
+    // Solo actualizar si cambió la posición
+    if (sourceIndex !== newIndex) {
+        console.log('Posición cambiada de', sourceIndex + 1, 'a', newIndex + 1);
+        updateSlidePositions();
+    } else {
+        console.log('Posición sin cambios');
+    }
 
     draggedElement = null;
+    sourceIndex = null;
 }
 
 function handleDragOver(e) {
@@ -76,14 +98,21 @@ function handleDragOver(e) {
 
     e.dataTransfer.dropEffect = 'move';
 
-    // Intercambiar posiciones inmediatamente al pasar sobre otro elemento
-    if (this !== draggedElement) {
+    return false;
+}
+
+function handleDragEnter(e) {
+    // Solo aplicar estilos si es un elemento diferente
+    if (this !== draggedElement && draggedElement) {
+        this.classList.add('drag-over');
+
+        // Intercambiar posiciones en el DOM
         const parent = this.parentNode;
         const allSlides = Array.from(parent.querySelectorAll('.ho-slide-card'));
         const draggedIndex = allSlides.indexOf(draggedElement);
         const targetIndex = allSlides.indexOf(this);
 
-        if (draggedIndex !== targetIndex) {
+        if (draggedIndex !== targetIndex && draggedIndex !== -1) {
             if (draggedIndex < targetIndex) {
                 parent.insertBefore(draggedElement, this.nextSibling);
             } else {
@@ -91,12 +120,13 @@ function handleDragOver(e) {
             }
         }
     }
-
-    return false;
 }
 
 function handleDragLeave(e) {
-    this.classList.remove('drag-over');
+    // Solo quitar el estilo si realmente salimos del elemento
+    if (e.target === this) {
+        this.classList.remove('drag-over');
+    }
 }
 
 function handleDrop(e) {
@@ -104,7 +134,15 @@ function handleDrop(e) {
         e.stopPropagation();
     }
 
+    this.classList.remove('drag-over');
+
     return false;
+}
+
+function getElementIndex(element) {
+    const parent = element.parentNode;
+    const slides = Array.from(parent.querySelectorAll('.ho-slide-card'));
+    return slides.indexOf(element);
 }
 
 function updateSlidePositions() {
@@ -119,6 +157,8 @@ function updateSlidePositions() {
         });
     });
 
+    console.log('Actualizando posiciones:', positions);
+
     // Enviar al servidor
     const formData = new FormData();
     formData.append('action', 'updatePositions');
@@ -126,25 +166,77 @@ function updateSlidePositions() {
 
     // Obtener URL del módulo desde la página
     const moduleUrl = document.querySelector('[data-module-url]');
-    if (moduleUrl) {
-        const ajaxUrl = moduleUrl.getAttribute('data-module-url') + '&ajax=1';
+    if (!moduleUrl) {
+        console.error('HO Slider: No se encontró data-module-url');
+        alert('Error: No se pudo encontrar la URL del módulo');
+        return;
+    }
 
-        fetch(ajaxUrl, {
-            method: 'POST',
-            body: formData
+    const ajaxUrl = moduleUrl.getAttribute('data-module-url') + '&ajax=1';
+    console.log('Enviando petición AJAX a:', ajaxUrl);
+
+    // Mostrar indicador de carga
+    showLoadingIndicator();
+
+    fetch(ajaxUrl, {
+        method: 'POST',
+        body: formData
+    })
+        .then(response => {
+            console.log('Respuesta recibida:', response.status);
+            return response.json();
         })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    console.log('Posiciones actualizadas correctamente');
-                } else {
-                    console.error('Error al actualizar posiciones:', data.message);
-                    alert('Error al actualizar el orden de los slides');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error de conexión al actualizar el orden');
-            });
+        .then(data => {
+            hideLoadingIndicator();
+            console.log('Datos recibidos:', data);
+
+            if (data.success) {
+                console.log('✓ Posiciones actualizadas correctamente');
+                showSuccessMessage();
+            } else {
+                console.error('✗ Error al actualizar posiciones:', data.message);
+                alert('Error al actualizar el orden de los slides: ' + (data.message || 'Error desconocido'));
+            }
+        })
+        .catch(error => {
+            hideLoadingIndicator();
+            console.error('✗ Error de red:', error);
+            alert('Error de conexión al actualizar el orden. Por favor, recargue la página.');
+        });
+}
+
+function showLoadingIndicator() {
+    // Crear indicador si no existe
+    let indicator = document.getElementById('ho-slider-loading');
+    if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.id = 'ho-slider-loading';
+        indicator.className = 'ho-slider-loading-indicator';
+        indicator.innerHTML = '<i class="icon-refresh icon-spin"></i> Actualizando orden...';
+        document.body.appendChild(indicator);
+    }
+    indicator.style.display = 'block';
+}
+
+function hideLoadingIndicator() {
+    const indicator = document.getElementById('ho-slider-loading');
+    if (indicator) {
+        indicator.style.display = 'none';
     }
 }
+
+function showSuccessMessage() {
+    // Crear mensaje de éxito temporal
+    const message = document.createElement('div');
+    message.className = 'ho-slider-success-message';
+    message.innerHTML = '<i class="icon-check"></i> Orden actualizado correctamente';
+    document.body.appendChild(message);
+
+    // Eliminar después de 3 segundos
+    setTimeout(() => {
+        message.classList.add('slide-out');
+        setTimeout(() => message.remove(), 300);
+    }, 3000);
+}
+
+
