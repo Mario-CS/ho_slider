@@ -28,7 +28,8 @@
 
 document.addEventListener('DOMContentLoaded', function () {
     initSlideDragAndDrop();
-    console.log('HO Slider: Sistema de drag & drop inicializado');
+    initSliderPreview();
+    console.log('HO Slider: Sistema de drag & drop y vista previa inicializados');
 });
 
 function initSlideDragAndDrop() {
@@ -239,4 +240,214 @@ function showSuccessMessage() {
     }, 3000);
 }
 
+// ============================================
+// VISTA PREVIA DEL SLIDER
+// ============================================
+
+function initSliderPreview() {
+    const previewButtons = document.querySelectorAll('.ho-preview-btn');
+
+    console.log('HO Slider Preview: Buscando botones...', previewButtons.length);
+
+    if (previewButtons.length === 0) {
+        console.log('HO Slider Preview: No se encontraron botones de vista previa');
+        return;
+    }
+
+    previewButtons.forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const slideId = this.getAttribute('data-slide-id');
+            console.log('HO Slider Preview: Click en botón, slide ID:', slideId);
+            showSliderPreview(slideId);
+        });
+    });
+
+    console.log(`HO Slider: ${previewButtons.length} botones de vista previa inicializados`);
+}
+
+function showSliderPreview(slideId) {
+    console.log('HO Slider Preview: Iniciando vista previa para slide', slideId);
+
+    const modal = document.getElementById('hoSliderPreviewModal');
+    const previewContent = document.getElementById('hoSliderPreviewContent');
+
+    if (!modal) {
+        console.error('HO Slider Preview: No se encontró el modal con ID hoSliderPreviewModal');
+        return;
+    }
+
+    if (!previewContent) {
+        console.error('HO Slider Preview: No se encontró el contenedor con ID hoSliderPreviewContent');
+        return;
+    }
+
+    console.log('HO Slider Preview: Modal y contenedor encontrados');
+
+    // Mostrar loading
+    previewContent.innerHTML = '<div class="ho-preview-loading"><i class="icon-spinner icon-spin"></i> Cargando vista previa...</div>';
+
+    // Mostrar el modal (compatible con Bootstrap 3 de PrestaShop)
+    if (typeof $ !== 'undefined' && $.fn.modal) {
+        console.log('HO Slider Preview: Usando jQuery modal');
+        $(modal).modal('show');
+    } else {
+        console.log('HO Slider Preview: Usando modal nativo');
+        modal.style.display = 'block';
+        modal.classList.add('in');
+    }
+
+    // Obtener la URL del módulo desde el atributo data
+    const panelBody = document.querySelector('.panel-body');
+    if (!panelBody) {
+        console.error('HO Slider Preview: No se encontró .panel-body');
+        return;
+    }
+
+    const moduleUrl = panelBody.getAttribute('data-module-url');
+    console.log('HO Slider Preview: URL del módulo:', moduleUrl);
+
+    const ajaxUrl = moduleUrl + '&ajax=1&action=getSliderPreview&id_slide=' + slideId;
+    console.log('HO Slider Preview: Llamando a:', ajaxUrl);
+
+    // Hacer petición AJAX
+    fetch(ajaxUrl)
+        .then(response => {
+            console.log('HO Slider Preview: Respuesta recibida', response.status);
+            return response.text();
+        })
+        .then(html => {
+            console.log('HO Slider Preview: HTML recibido, longitud:', html.length);
+            previewContent.innerHTML = html;
+
+            // Inicializar el slider después de cargar el HTML
+            setTimeout(() => {
+                initPreviewSlider();
+            }, 100);
+        })
+        .catch(error => {
+            console.error('HO Slider Preview: Error al cargar vista previa:', error);
+            previewContent.innerHTML = '<div class="alert alert-danger ho-preview-alert-danger"><i class="icon-warning"></i> Error al cargar la vista previa.</div>';
+        });
+}
+
+function initPreviewSlider() {
+    // Reutilizar el código del slider del frontend
+    const slider = document.querySelector('#hoSliderPreviewContent .ho-slider-wrapper');
+
+    if (!slider) {
+        console.log('No se encontró slider en la vista previa');
+        return;
+    }
+
+    const slides = slider.querySelectorAll('.ho-slide');
+    const prevBtn = slider.querySelector('.ho-slider-prev');
+    const nextBtn = slider.querySelector('.ho-slider-next');
+    const dots = slider.querySelectorAll('.ho-slider-dot');
+
+    let currentSlide = 0;
+    let autoplayInterval = null;
+
+    function showSlide(index) {
+        slides.forEach(slide => slide.classList.remove('active'));
+        dots.forEach(dot => dot.classList.remove('active'));
+
+        if (slides[index]) {
+            slides[index].classList.add('active');
+        }
+        if (dots[index]) {
+            dots[index].classList.add('active');
+        }
+
+        currentSlide = index;
+    }
+
+    function nextSlide() {
+        let next = currentSlide + 1;
+        if (next >= slides.length) {
+            next = 0;
+        }
+        showSlide(next);
+    }
+
+    function prevSlide() {
+        let prev = currentSlide - 1;
+        if (prev < 0) {
+            prev = slides.length - 1;
+        }
+        showSlide(prev);
+    }
+
+    // Eventos de navegación
+    if (prevBtn) {
+        prevBtn.addEventListener('click', prevSlide);
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', nextSlide);
+    }
+
+    // Eventos de los dots
+    dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => showSlide(index));
+    });
+
+    // Autoplay
+    autoplayInterval = setInterval(nextSlide, 5000);
+
+    // Pausar en hover
+    slider.addEventListener('mouseenter', () => {
+        if (autoplayInterval) {
+            clearInterval(autoplayInterval);
+        }
+    });
+
+    slider.addEventListener('mouseleave', () => {
+        autoplayInterval = setInterval(nextSlide, 5000);
+    });
+
+    // Soporte táctil (swipe)
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    slider.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    });
+
+    slider.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    });
+
+    function handleSwipe() {
+        if (touchEndX < touchStartX - 50) {
+            nextSlide();
+        }
+        if (touchEndX > touchStartX + 50) {
+            prevSlide();
+        }
+    }
+
+    // Teclado
+    document.addEventListener('keydown', (e) => {
+        if (modal.style.display === 'block' || modal.classList.contains('in')) {
+            if (e.key === 'ArrowLeft') prevSlide();
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'Escape') closeModal();
+        }
+    });
+
+    console.log('Vista previa del slider inicializada con', slides.length, 'slides');
+}
+
+function closeModal() {
+    const modal = document.getElementById('hoSliderPreviewModal');
+    if (typeof $ !== 'undefined' && $.fn.modal) {
+        $(modal).modal('hide');
+    } else {
+        modal.style.display = 'none';
+        modal.classList.remove('in');
+    }
+}
 

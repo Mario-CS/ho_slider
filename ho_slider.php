@@ -148,11 +148,10 @@ class Ho_slider extends Module
      */
     protected function processAjax()
     {
-        header('Content-Type: application/json');
-        
         $action = Tools::getValue('action');
         
         if ($action === 'updatePositions') {
+            header('Content-Type: application/json');
             $positions = json_decode(Tools::getValue('positions'), true);
             
             if (empty($positions)) {
@@ -180,7 +179,57 @@ class Ho_slider extends Module
                 'success' => $success,
                 'message' => $success ? 'Positions updated' : 'Error updating positions'
             ]);
+        } elseif ($action === 'getSliderPreview') {
+            // Vista previa del slider
+            $idSlide = (int)Tools::getValue('id_slide');
+            
+            if ($idSlide > 0) {
+                // Vista previa de UN slide específico
+                $slide = new HoSlide($idSlide);
+                if (Validate::isLoadedObject($slide)) {
+                    $slides = array(array(
+                        'id_slide' => $slide->id_slide,
+                        'title' => $slide->title[$this->context->language->id],
+                        'description' => $slide->description[$this->context->language->id],
+                        'url' => $slide->url[$this->context->language->id],
+                        'legend' => $slide->legend[$this->context->language->id],
+                        'image' => $slide->image[$this->context->language->id],
+                        'active' => $slide->active
+                    ));
+                } else {
+                    $slides = array();
+                }
+            } else {
+                // Vista previa de TODOS los slides activos
+                $slides = HoSlide::getSlides(
+                    $this->context->language->id,
+                    $this->context->shop->id,
+                    true
+                );
+            }
+            
+            if (empty($slides)) {
+                echo '<div class="alert alert-warning ho-preview-alert-warning">
+                    <i class="icon-warning"></i> No hay slides para mostrar en la vista previa.
+                </div>';
+                return;
+            }
+            
+            // Asignar variables al Smarty
+            $this->context->smarty->assign(array(
+                'slides' => $slides,
+                'image_baseurl' => $this->context->link->getBaseLink() . 'img/ho_slider/',
+                'is_preview' => true
+            ));
+            
+            // Nota: No cargamos front.css aquí para evitar que afecte a todo el BackOffice.
+            // Los estilos específicos de la vista previa están en back.css con el prefijo
+            // #hoSliderPreviewContent para aislarlos.
+            
+            // Renderizar el template del slider
+            echo $this->display(__FILE__, 'views/templates/hook/ho_slider.tpl');
         } else {
+            header('Content-Type: application/json');
             echo json_encode(['success' => false, 'message' => 'Unknown action']);
         }
     }
@@ -321,7 +370,7 @@ class Ho_slider extends Module
                 'html_content' => '<div class="form-group">
                     <label class="control-label col-lg-3">' . $this->l('Imagen actual') . '</label>
                     <div class="col-lg-9">
-                        <img src="' . $image_url . '" style="max-width: 300px; height: auto;" />
+                        <img src="' . $image_url . '" class="ho-form-image-preview" />
                         <p class="help-block">' . $this->l('Sube una nueva imagen para reemplazar la actual') . '</p>
                     </div>
                 </div>'

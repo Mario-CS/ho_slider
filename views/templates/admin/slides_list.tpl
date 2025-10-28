@@ -24,7 +24,7 @@
 *}
 
 <div class="panel">
-    <div class="panel-heading" style="display: flex; justify-content: space-between; align-items: center;">
+    <div class="panel-heading ho-slides-panel-heading">
         <div>
             <i class="icon-list"></i> {l s='Lista de diapositivas' mod='ho_slider'}
         </div>
@@ -35,59 +35,49 @@
     </div>
 
     <div class="panel-body"
-        data-module-url="{$current_index|escape:'html':'UTF-8'}&configure=ho_slider&token={$token|escape:'html':'UTF-8'}">
+        data-module-url="{$current_index|escape:'html':'UTF-8'}&token={$token|escape:'html':'UTF-8'}">
         {if $slides|@count > 0}
             {foreach $slides as $slide}
-                <div class="ho-slide-card" data-slide-id="{$slide.id_slide|intval}" draggable="true"
-                    style="display: flex; align-items: center; padding: 20px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 15px; background: #fff; user-select: none;">
+                <div class="ho-slide-card" data-slide-id="{$slide.id_slide|intval}" draggable="true">
                     <!-- Icono de arrastre -->
-                    <div class="drag-handle" style="margin-right: 20px; cursor: move; color: #ccc;">
-                        <i class="icon-move" style="font-size: 24px;"></i>
+                    <div class="drag-handle">
+                        <i class="icon-move"></i>
                     </div>
 
                     <!-- Imagen del slide -->
-                    <div style="margin-right: 20px;">
+                    <div class="ho-slide-image-wrapper">
                         {if $slide.image}
                             <img src="{$image_baseurl|escape:'html':'UTF-8'}{$slide.image|escape:'html':'UTF-8'}"
-                                alt="{$slide.title|escape:'html':'UTF-8'}"
-                                style="max-width: 260px; height: auto; border-radius: 4px; border: 1px solid #eee;">
+                                alt="{$slide.title|escape:'html':'UTF-8'}">
                         {else}
-                            <div
-                                style="width: 260px; height: 150px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; border-radius: 4px; border: 1px solid #eee;">
+                            <div class="ho-slide-no-image">
                                 <span class="text-muted">{l s='Sin imagen' mod='ho_slider'}</span>
                             </div>
                         {/if}
                     </div>
 
                     <!-- Información del slide -->
-                    <div style="flex: 1; min-width: 220px;">
-                        <h4 style="margin: 0 0 5px 0; font-weight: 600;">
+                    <div class="ho-slide-info">
+                        <h4>
                             #{$slide.id_slide|escape:'html':'UTF-8'} - {$slide.title|escape:'html':'UTF-8'}
                         </h4>
                         {if $slide.description}
-                            <p style="margin: 0 0 10px 0; color: #666; font-size: 13px;">{$slide.description|escape:'html':'UTF-8'}
-                            </p>
+                            <p class="ho-slide-description">{$slide.description|escape:'html':'UTF-8'}</p>
                         {/if}
                         {if $slide.url}
-                            <p style="margin: 0; font-size: 12px; color: #999;">
+                            <p class="ho-slide-url">
                                 <i class="icon-link"></i> {$slide.url|escape:'html':'UTF-8'}
                             </p>
                         {/if}
                     </div>
 
                     <!-- Botones de acción -->
-                    <div style="display: flex; gap: 10px; margin-left: 20px;">
-                        {if $slide.active}
-                            <a href="{$current_index|escape:'html':'UTF-8'}&statusSlide=1&id_slide={$slide.id_slide|intval}&token={$token|escape:'html':'UTF-8'}"
-                                class="btn btn-success" title="{l s='Activado' mod='ho_slider'}">
-                                <i class="icon-check"></i> {l s='Activado' mod='ho_slider'}
-                            </a>
-                        {else}
-                            <a href="{$current_index|escape:'html':'UTF-8'}&statusSlide=1&id_slide={$slide.id_slide|intval}&token={$token|escape:'html':'UTF-8'}"
-                                class="btn btn-danger" title="{l s='Desactivado' mod='ho_slider'}">
-                                <i class="icon-remove"></i> {l s='Desactivado' mod='ho_slider'}
-                            </a>
-                        {/if}
+                    <div class="ho-slide-actions">
+                        <!-- Columna 1 -->
+                        <button type="button" class="btn btn-info ho-preview-btn" data-slide-id="{$slide.id_slide|intval}"
+                            title="{l s='Vista Previa' mod='ho_slider'}">
+                            <i class="icon-eye"></i> {l s='Vista Previa' mod='ho_slider'}
+                        </button>
 
                         <a href="{$current_index|escape:'html':'UTF-8'}&updateSlide=1&id_slide={$slide.id_slide|intval}&token={$token|escape:'html':'UTF-8'}"
                             class="btn btn-default" title="{l s='Modificar' mod='ho_slider'}">
@@ -99,8 +89,21 @@
                             <i class="icon-copy"></i> {l s='Duplicar' mod='ho_slider'}
                         </a>
 
+                        <!-- Columna 2 -->
+                        {if $slide.active}
+                            <a href="{$current_index|escape:'html':'UTF-8'}&statusSlide=1&id_slide={$slide.id_slide|intval}&token={$token|escape:'html':'UTF-8'}"
+                                class="btn btn-success" title="{l s='Activado - Click para desactivar' mod='ho_slider'}">
+                                <i class="icon-check"></i> {l s='Activado' mod='ho_slider'}
+                            </a>
+                        {else}
+                            <a href="{$current_index|escape:'html':'UTF-8'}&statusSlide=1&id_slide={$slide.id_slide|intval}&token={$token|escape:'html':'UTF-8'}"
+                                class="btn btn-danger" title="{l s='Desactivado - Click para activar' mod='ho_slider'}">
+                                <i class="icon-remove"></i> {l s='Desactivado' mod='ho_slider'}
+                            </a>
+                        {/if}
+
                         <a href="{$current_index|escape:'html':'UTF-8'}&deleteSlide=1&id_slide={$slide.id_slide|intval}&token={$token|escape:'html':'UTF-8'}"
-                            class="btn btn-default" title="{l s='Eliminar' mod='ho_slider'}"
+                            class="btn btn-danger" title="{l s='Eliminar' mod='ho_slider'}"
                             onclick="return confirm('{l s='¿Está seguro de que desea eliminar este slide?' mod='ho_slider' js=1}');">
                             <i class="icon-trash"></i> {l s='Eliminar' mod='ho_slider'}
                         </a>
@@ -113,5 +116,28 @@
                 {l s='No hay slides creados. Añade tu primer slide usando el botón de arriba.' mod='ho_slider'}
             </div>
         {/if}
+    </div>
+</div>
+
+<!-- Modal de Vista Previa -->
+<div id="hoSliderPreviewModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">
+                    <i class="icon-eye"></i> {l s='Vista Previa del Slider' mod='ho_slider'}
+                </h4>
+            </div>
+            <div class="modal-body">
+                <!-- El contenido del slider se cargará aquí dinámicamente -->
+                <div id="hoSliderPreviewContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    <i class="icon-remove"></i> {l s='Cerrar' mod='ho_slider'}
+                </button>
+            </div>
+        </div>
     </div>
 </div>

@@ -26,7 +26,10 @@
 * to avoid any conflicts with others containers.
 */
 
-/* Estilos para el panel de administración */
+/* ============================================
+   ESTILOS GENERALES DEL PANEL
+   ============================================ */
+
 .ho-slider-admin .panel {
     margin-bottom: 20px;
 }
@@ -235,5 +238,297 @@
         margin-left: 0 !important;
         flex-wrap: wrap;
         gap: 8px;
+    }
+}
+
+/* ============================================
+   ESTILOS PARA SLIDES LIST (sin inline styles)
+   ============================================ */
+
+/* Panel heading con flexbox */
+.ho-slides-panel-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Slide card layout */
+.ho-slide-card {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    background: #fff;
+    user-select: none;
+    transition: all 0.2s ease;
+    cursor: grab;
+    position: relative;
+    flex-wrap: wrap;
+}
+
+/* Drag handle */
+.ho-slide-card .drag-handle {
+    margin-right: 20px;
+    cursor: move;
+    color: #ccc;
+}
+
+.ho-slide-card .drag-handle .icon-move {
+    font-size: 24px;
+}
+
+/* Imagen del slide */
+.ho-slide-image-wrapper {
+    margin-right: 20px;
+}
+
+.ho-slide-image-wrapper img {
+    max-width: 260px;
+    height: auto;
+    border-radius: 4px;
+    border: 1px solid #eee;
+}
+
+.ho-slide-no-image {
+    width: 260px;
+    height: 150px;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    border: 1px solid #eee;
+}
+
+/* Información del slide */
+.ho-slide-info {
+    flex: 1;
+    min-width: 220px;
+}
+
+.ho-slide-info h4 {
+    margin: 0 0 5px 0;
+    font-weight: 600;
+}
+
+.ho-slide-info .ho-slide-description {
+    margin: 0 0 10px 0;
+    color: #666;
+    font-size: 13px;
+}
+
+.ho-slide-info .ho-slide-url {
+    margin: 0;
+    font-size: 12px;
+    color: #999;
+}
+
+/* Botones de acción */
+.ho-slide-actions {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-rows: repeat(3, auto);
+    grid-auto-flow: column;
+    gap: 8px;
+    margin-left: 20px;
+}
+
+/* Preview alert con margen */
+.ho-preview-alert-warning,
+.ho-preview-alert-danger {
+    margin: 20px;
+}
+
+/* Loading de vista previa */
+.ho-preview-loading {
+    padding: 50px;
+    text-align: center;
+}
+
+/* Modal de vista previa ajustes */
+#hoSliderPreviewModal {
+    display: none;
+}
+
+#hoSliderPreviewModal .modal-dialog {
+    max-width: 1110px; /* ancho máximo solicitado */
+}
+
+#hoSliderPreviewModal .modal-body {
+    padding: 0;
+}
+
+/* Imagen de formulario */
+.ho-form-image-preview {
+    max-width: 300px;
+    height: auto;
+}
+
+/* ============================================
+   MODAL DE VISTA PREVIA
+   ============================================ */
+
+#hoSliderPreviewModal .modal-dialog {
+    width: 100%;
+    max-width: 1110px; /* igual que el front */
+    margin: 30px auto; /* centrado */
+}
+
+#hoSliderPreviewModal .modal-body {
+    padding: 0;
+    background: #f5f5f5;
+    overflow: hidden;
+}
+
+#hoSliderPreviewContent {
+    min-height: 300px;
+}
+
+/* Ajustes del slider dentro del modal - IGUAL QUE EL FRONTEND */
+#hoSliderPreviewContent .ho-slider-wrapper {
+    max-width: 100%;
+    margin: 0;
+    background: #f5f5f5;
+}
+
+#hoSliderPreviewContent .ho-slider-slides {
+    /* Mantener el mismo ratio que el frontend (16:5) */
+    padding-bottom: 31.25%;
+    height: 0;
+    min-height: unset;
+    max-height: unset;
+}
+
+#hoSliderPreviewContent .ho-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* Imágenes con el mismo comportamiento que el frontend */
+#hoSliderPreviewContent .ho-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Igual que en el frontend */
+    display: block;
+}
+
+/* Caption con los mismos estilos que el frontend */
+#hoSliderPreviewContent .ho-slide-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 40px 20px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 100%);
+    max-height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+#hoSliderPreviewContent .ho-slide-caption .container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+#hoSliderPreviewContent .ho-slide-title {
+    font-size: 48px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 15px 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+#hoSliderPreviewContent .ho-slide-description {
+    font-size: 18px;
+    color: #fff;
+    max-width: 800px;
+    line-height: 1.6;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+    margin: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+/* Controles con los mismos estilos que el frontend */
+#hoSliderPreviewContent .ho-slider-control {
+    opacity: 0.8;
+}
+
+#hoSliderPreviewContent .ho-slider-control:hover {
+    opacity: 1;
+}
+
+/* Dots con el mismo estilo */
+#hoSliderPreviewContent .ho-slider-dots {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+}
+
+/* Loading spinner */
+.icon-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive para vista previa */
+@media (max-width: 1400px) {
+    #hoSliderPreviewModal .modal-dialog {
+        width: 95%;
+        max-width: 95%; /* ocupar casi todo en pantallas medianas */
+    }
+
+    #hoSliderPreviewContent .ho-slide-caption {
+        padding: 30px 20px;
+    }
+
+    #hoSliderPreviewContent .ho-slide-title {
+        font-size: 36px;
+        margin-bottom: 10px;
+    }
+
+    #hoSliderPreviewContent .ho-slide-description {
+        font-size: 16px;
+        line-height: 1.5;
+    }
+}
+
+@media (max-width: 768px) {
+    #hoSliderPreviewContent .ho-slide-caption {
+        padding: 20px 15px;
+    }
+
+    #hoSliderPreviewContent .ho-slide-title {
+        font-size: 24px;
+        margin-bottom: 8px;
+    }
+
+    #hoSliderPreviewContent .ho-slide-description {
+        font-size: 14px;
+        line-height: 1.4;
     }
 }
