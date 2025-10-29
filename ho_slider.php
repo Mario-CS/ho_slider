@@ -289,9 +289,9 @@ class Ho_slider extends Module
                         'label' => $this->l('Título'),
                         'name' => 'title',
                         'lang' => true,
-                        'required' => true,
+                        'required' => false,
                         'col' => 6,
-                        'hint' => $this->l('Título principal del slide')
+                        'hint' => $this->l('Título principal del slide (opcional)')
                     ),
                     array(
                         'type' => 'textarea',
@@ -627,13 +627,6 @@ class Ho_slider extends Module
                 // Inicializar como vacío (se llenará después si se sube imagen)
                 $slide->image[$idLang] = '';
             }
-        }
-
-        // Validar que al menos el idioma por defecto tenga título
-        if (empty($slide->title[$defaultLangId])) {
-            // Mantener parámetro para volver al formulario
-            $_GET['addSlide'] = 1;
-            return $this->displayError($this->l('El título es obligatorio'));
         }
 
         // Procesar imágenes

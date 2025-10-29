@@ -26,29 +26,63 @@
 * to avoid any conflicts with others containers.
 */
 
-/* Contenedor principal del slider */
+/* ========================================
+   HO SLIDER - Slider 3D Ultra Moderno ✨
+   ======================================== */
+
+/* Variables CSS solo para el slider (no afectan a PrestaShop) */
 .ho-slider-container {
-    width: 100%;
-    overflow: hidden;
+    --slider-transition: 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --slider-control-size: 60px;
+    --slider-dot-size: 14px;
+    --slider-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    --slider-primary: #a6312e;
+    --slider-glow: 0 0 30px rgba(166, 49, 46, 0.6);
+    --slider-card-depth: 40px;
+}
+
+/* ===== Contenedor Principal ===== */
+.ho-slider-container {
+    max-width: 1200px; /* Reducido de 1600px */
+    margin: 60px auto;
+    padding: 0 40px;
     position: relative;
-    margin: 0 0 30px;
 }
 
 .ho-slider-wrapper {
     position: relative;
     width: 100%;
-    background: #f5f5f5;
+    overflow: visible;
+    border-radius: 30px;
+    transform-style: preserve-3d;
+    transition: transform 0.3s ease;
 }
 
+.ho-slider-wrapper::before {
+    display: none; /* Glow eliminado completamente */
+}
+
+@keyframes glowPulse {
+    0%,
+    100% {
+        opacity: 0.15;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.25;
+        transform: scale(1.05);
+    }
+}
+
+/* ===== Contenedor de Slides - Simplificado ===== */
 .ho-slider-slides {
+    display: block;
     position: relative;
-    width: 100%;
     height: 0;
-    padding-bottom: 31.25%; /* Ratio 16:5 (600/1920) */
-    overflow: hidden;
+    padding-bottom: 50%; /* Reducido de 56.25% para imágenes más pequeñas */
 }
 
-/* Slides individuales */
+/* ===== Slide Individual ===== */
 .ho-slide {
     position: absolute;
     top: 0;
@@ -57,200 +91,841 @@
     height: 100%;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.6s ease-in-out, visibility 0.6s ease-in-out;
+    transform: scale(0.9);
+    transition: opacity 0.6s ease, transform 0.6s ease, visibility 0s linear 0.6s;
+    border-radius: 30px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    pointer-events: none;
+    z-index: 0;
 }
 
 .ho-slide.active {
     opacity: 1;
     visibility: visible;
-    z-index: 1;
-}
-
-.ho-slide-link {
-    display: block;
-    width: 100%;
-    height: 100%;
-    position: relative;
-}
-
-.ho-slide-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-/* Caption del slide */
-.ho-slide-caption {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 100%);
-    color: #fff;
-    padding: 40px 0;
-    z-index: 2;
-    max-height: 100%;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-}
-
-.ho-slide-title {
-    font-size: 42px;
-    font-weight: 700;
-    margin: 0 0 15px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    line-height: 1.2;
-    overflow-wrap: anywhere; /* evita desbordes de palabras muy largas */
-    word-break: break-word; /* fallback */
-}
-
-.ho-slide-description {
-    font-size: 18px;
-    margin: 0;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
-    line-height: 1.4;
-    overflow-wrap: anywhere;
-    word-break: break-word;
-}
-
-/* Controles de navegación */
-.ho-slider-control {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.9);
-    border: none;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    cursor: pointer;
+    transform: scale(1);
+    transition: opacity 0.6s ease, transform 0.6s ease, visibility 0s linear 0s;
     z-index: 10;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    color: #333;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    pointer-events: auto;
+}
+
+/* Slides prev/next visibles por detrás y clicables */
+.ho-slide.prev {
+    opacity: 0.5;
+    visibility: visible;
+    transform: scale(0.85) translateX(-40%);
+    transition: opacity 0.6s ease, transform 0.6s ease, visibility 0s linear 0s;
+    z-index: 1;
+    filter: brightness(0.7);
+    cursor: pointer; /* Hacer clicable */
+    pointer-events: auto; /* Permitir clics */
+}
+
+.ho-slide.prev:hover {
+    opacity: 0.7;
+    filter: brightness(0.85);
+}
+
+.ho-slide.next {
+    opacity: 0.5;
+    visibility: visible;
+    transform: scale(0.85) translateX(40%);
+    transition: opacity 0.6s ease, transform 0.6s ease, visibility 0s linear 0s;
+    z-index: 1;
+    filter: brightness(0.7);
+    cursor: pointer; /* Hacer clicable */
+    pointer-events: auto; /* Permitir clics */
+}
+
+.ho-slide.next:hover {
+    opacity: 0.7;
+    filter: brightness(0.85);
+}
+
+/* Imagen - contain para no cortar */
+.ho-slide-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain; /* Cambiado de cover a contain para que no se corten las imágenes */
+    background: #000; /* Fondo negro para las áreas vacías */
+}
+
+/* Efecto de cristal/glass sobre la imagen - DESACTIVADO */
+.ho-slide::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 60%);
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    z-index: 2;
+    pointer-events: none;
+    display: none; /* Desactivado */
+}
+
+.ho-slide.active::after {
+    opacity: 0; /* Desactivado */
+    display: none;
+}
+
+/* ===== Controles de Navegación - OCULTOS ===== */
+.ho-slider-control {
+    display: none; /* Ocultar botones de navegación */
+}
+
+.ho-slider-control::before {
+    content: "";
+    position: absolute;
+    inset: -10px;
+    background: var(--slider-primary);
+    border-radius: 50%;
+    opacity: 0;
+    filter: blur(20px);
+    transition: opacity 0.4s ease;
 }
 
 .ho-slider-control:hover {
-    background: rgba(255, 255, 255, 1);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-50%) scale(1.15) rotate(15deg);
+    box-shadow: 0 15px 45px rgba(102, 126, 234, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.ho-slider-control:hover::before {
+    opacity: 0.6;
+}
+
+.ho-slider-control:active {
+    transform: translateY(-50%) scale(0.95);
 }
 
 .ho-slider-prev {
-    left: 20px;
+    left: 40px;
 }
 
 .ho-slider-next {
-    right: 20px;
+    right: 40px;
 }
 
-/* Indicadores de puntos */
-.ho-slider-dots {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+/* Iconos modernos con SVG effect */
+.ho-slider-control span {
+    position: relative;
+    width: 20px;
+    height: 20px;
     display: flex;
-    gap: 10px;
-    z-index: 10;
+    align-items: center;
+    justify-content: center;
+}
+
+.ho-slider-control span::before {
+    content: "";
+    display: block;
+    width: 14px;
+    height: 14px;
+    border-left: 3px solid white;
+    border-bottom: 3px solid white;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    transition: all 0.3s ease;
+}
+
+.ho-slider-control:hover span::before {
+    border-color: #fff;
+    filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.8));
+}
+
+.ho-slider-prev span::before {
+    transform: rotate(45deg);
+    margin-left: 4px;
+}
+
+.ho-slider-next span::before {
+    transform: rotate(-135deg);
+    margin-right: 4px;
+}
+
+/* ===== Indicadores (Dots) - Debajo del carrusel ===== */
+.ho-slider-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    margin-top: 30px;
+    padding: 0;
+    background: transparent;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .ho-slider-dot {
-    width: 12px;
-    height: 12px;
+    width: var(--slider-dot-size);
+    height: var(--slider-dot-size);
+    border: 2px solid rgba(166, 49, 46, 0.4);
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.5);
-    border: 2px solid rgba(255, 255, 255, 0.8);
+    background: transparent;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     padding: 0;
+    position: relative;
+    overflow: visible;
 }
 
-.ho-slider-dot:hover {
-    background: rgba(255, 255, 255, 0.8);
-    transform: scale(1.2);
+.ho-slider-dot::before {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    background: #a6312e;
+    border-radius: 50%;
+    opacity: 0;
+    filter: blur(8px);
+    transition: all 0.5s ease;
+}
+
+.ho-slider-dot::after {
+    content: "";
+    position: absolute;
+    inset: 2px;
+    background: #a6312e;
+    border-radius: 50%;
+    transform: scale(0);
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.ho-slider-dot:hover::before {
+    opacity: 0.5;
+    inset: -8px;
+}
+
+.ho-slider-dot:hover::after {
+    transform: scale(0.5);
 }
 
 .ho-slider-dot.active {
-    background: rgba(255, 255, 255, 1);
-    transform: scale(1.3);
+    border-color: #a6312e;
+    background: #a6312e;
+    width: 40px;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(166, 49, 46, 0.5);
 }
 
-/* Responsive */
-@media (max-width: 991px) {
+.ho-slider-dot.active::before {
+    opacity: 1;
+    inset: -6px;
+}
+
+.ho-slider-dot.active::after {
+    transform: scale(1);
+    background: #a6312e;
+}
+
+/* ===== Animaciones Espectaculares ===== */
+@keyframes slideIn3D {
+    0% {
+        opacity: 0;
+        visibility: visible;
+        transform: rotateY(-90deg) scale(0.5) translateZ(-500px);
+        filter: blur(10px);
+    }
+    60% {
+        opacity: 0.8;
+        transform: rotateY(5deg) scale(1.05) translateZ(20px);
+    }
+    100% {
+        opacity: 1;
+        visibility: visible;
+        transform: rotateY(0deg) scale(1) translateZ(0);
+        filter: blur(0);
+    }
+}
+
+@keyframes slideOut3D {
+    0% {
+        opacity: 1;
+        visibility: visible;
+        transform: rotateY(0deg) scale(1) translateZ(0);
+    }
+    100% {
+        opacity: 0;
+        visibility: hidden;
+        transform: rotateY(90deg) scale(0.5) translateZ(-500px);
+        filter: blur(10px);
+    }
+}
+
+@keyframes flipInFromRight {
+    0% {
+        opacity: 0;
+        visibility: visible;
+        transform: rotateY(-60deg) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        visibility: visible;
+        transform: rotateY(0deg) scale(1);
+    }
+}
+
+@keyframes flipInFromLeft {
+    0% {
+        opacity: 0;
+        visibility: visible;
+        transform: rotateY(60deg) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        visibility: visible;
+        transform: rotateY(0deg) scale(1);
+    }
+}
+
+@keyframes zoomRotate {
+    0% {
+        opacity: 0;
+        visibility: visible;
+        transform: scale(0.5);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1);
+    }
+}
+
+/* Aplicar animaciones dinámicas */
+.ho-slide.animating-next {
+    visibility: visible;
+    animation: flipInFromRight 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    /* z-index ya definido arriba con .animating-next, .animating-prev, .zoom-effect */
+}
+
+.ho-slide.animating-prev {
+    visibility: visible;
+    animation: flipInFromLeft 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    /* z-index ya definido arriba */
+}
+
+.ho-slide.zoom-effect {
+    visibility: visible;
+    animation: zoomRotate 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    /* z-index ya definido arriba */
+}
+
+/* ===== Barra de Progreso - OCULTA ===== */
+.ho-slider-progress {
+    display: none; /* Ocultar la barra de progreso */
+}
+
+.ho-slider-progress::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.ho-slider-progress-bar {
+    height: 100%;
+    background: var(--slider-primary);
+    width: 0%;
+    transition: width 0.1s linear;
+    position: relative;
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.8);
+}
+
+.ho-slider-progress-bar::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: -2px;
+    width: 10px;
+    height: 9px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+}
+
+/* ===== Efecto de Partículas ===== */
+.ho-slider-particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+    overflow: hidden;
+    border-radius: 30px;
+}
+
+.particle {
+    display: none; /* Partículas eliminadas completamente */
+}
+
+@keyframes floatParticle {
+    0% {
+        opacity: 0;
+        transform: translateY(100vh) scale(0);
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-100px) scale(1);
+    }
+}
+
+.particle:nth-child(1) {
+    left: 10%;
+    animation-delay: 0s;
+}
+.particle:nth-child(2) {
+    left: 25%;
+    animation-delay: 0.5s;
+}
+.particle:nth-child(3) {
+    left: 40%;
+    animation-delay: 1s;
+}
+.particle:nth-child(4) {
+    left: 55%;
+    animation-delay: 1.5s;
+}
+.particle:nth-child(5) {
+    left: 70%;
+    animation-delay: 2s;
+}
+.particle:nth-child(6) {
+    left: 85%;
+    animation-delay: 2.5s;
+}
+
+/* ===== Diseño Responsivo Optimizado ===== */
+@media (max-width: 1024px) {
+    .ho-slider-container {
+        padding: 0 30px;
+        margin: 40px auto;
+    }
+
+    .ho-slider-control {
+        width: 50px;
+        height: 50px;
+    }
+
+    .ho-slider-prev {
+        left: 30px;
+    }
+    .ho-slider-next {
+        right: 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    .ho-slider-container {
+        margin: 30px auto;
+        padding: 0 20px;
+        perspective: 1500px;
+        max-width: 100%;
+    }
+
     .ho-slider-slides {
-        padding-bottom: 40%; /* Ratio más alto en tablets */
+        padding-bottom: 60%; /* Más alto en tablets */
     }
 
-    .ho-slide-title {
-        font-size: 32px;
+    .ho-slider-wrapper {
+        border-radius: 20px;
     }
 
-    .ho-slide-description {
-        font-size: 16px;
+    .ho-slider-wrapper::before {
+        border-radius: 25px;
+    }
+
+    .ho-slide {
+        border-radius: 20px;
+    }
+
+    .ho-slider-control {
+        width: 45px;
+        height: 45px;
+    }
+
+    .ho-slider-prev {
+        left: 15px;
+    }
+    .ho-slider-next {
+        right: 15px;
+    }
+
+    .ho-slider-dots {
+        margin-top: 20px;
+        gap: 10px;
+        padding: 12px 20px;
+    }
+
+    .ho-slider-dot {
+        width: 12px;
+        height: 12px;
+    }
+
+    .ho-slider-dot.active {
+        width: 32px;
+    }
+
+    .ho-slide-image {
+        aspect-ratio: 16 / 10; /* Mejor proporción para tablets */
+    }
+
+    /* Reducir efectos 3D en tablets */
+    .ho-slide.prev,
+    .ho-slide.next {
+        transform: scale(0.85) translateZ(-200px);
+        opacity: 0.4;
+    }
+}
+
+@media (max-width: 480px) {
+    .ho-slider-container {
+        padding: 0 10px;
+        margin: 20px auto;
+    }
+
+    .ho-slider-slides {
+        padding-bottom: 75%; /* Más cuadrado en móviles */
     }
 
     .ho-slider-control {
         width: 40px;
         height: 40px;
-        font-size: 16px;
+        display: none; /* Ocultar botones en móviles - solo swipe */
+    }
+
+    .ho-slider-control span::before {
+        width: 12px;
+        height: 12px;
+        border-width: 2.5px;
     }
 
     .ho-slider-prev {
         left: 10px;
     }
-
     .ho-slider-next {
         right: 10px;
     }
-}
-
-@media (max-width: 767px) {
-    .ho-slider-slides {
-        padding-bottom: 56.25%; /* Ratio 16:9 en móviles */
-    }
-
-    .ho-slide-caption {
-        padding: 20px 0;
-    }
-
-    .ho-slide-title {
-        font-size: 24px;
-        margin-bottom: 10px;
-    }
-
-    .ho-slide-description {
-        font-size: 14px;
-    }
-
-    .ho-slider-control {
-        width: 35px;
-        height: 35px;
-        font-size: 14px;
-    }
 
     .ho-slider-dots {
-        bottom: 10px;
+        margin-top: 15px;
         gap: 8px;
+        padding: 10px 16px;
     }
 
     .ho-slider-dot {
         width: 10px;
         height: 10px;
+        border-width: 1.5px;
+    }
+
+    .ho-slider-dot.active {
+        width: 26px;
+    }
+
+    /* En móviles, las imágenes laterales se ocultan más */
+    .ho-slide.prev,
+    .ho-slide.next {
+        transform: scale(0.75) translateZ(-250px);
+        opacity: 0.2;
+    }
+
+    /* Imagen principal más grande en móviles */
+    .ho-slide.active {
+        transform: scale(1.05) translateZ(0) rotateY(0deg);
+    }
+}
+
+/* ===== Responsive Adicional para Pantallas Muy Pequeñas ===== */
+@media (max-width: 360px) {
+    .ho-slider-container {
+        margin: 10px auto;
+    }
+
+    .ho-slider-dots {
+        margin-top: 10px;
+        padding: 8px 12px;
+        gap: 6px;
+    }
+
+    .ho-slider-dot {
+        width: 8px;
+        height: 8px;
+    }
+
+    .ho-slider-dot.active {
+        width: 20px;
+    }
+}
+
+/* ===== Estados de Carga Futurista ===== */
+.ho-slider-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(166, 49, 46, 0.3));
+    z-index: 1000;
+    backdrop-filter: blur(20px);
+    border-radius: 30px;
+}
+
+.ho-slider-loading::after {
+    content: "";
+    width: 60px;
+    height: 60px;
+    border: 5px solid rgba(255, 255, 255, 0.1);
+    border-top-color: white;
+    border-right-color: #a6312e;
+    border-radius: 50%;
+    animation: spinAdvanced 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+    box-shadow: 0 0 30px rgba(166, 49, 46, 0.5);
+}
+
+@keyframes spinAdvanced {
+    0% {
+        transform: rotate(0deg) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: rotate(180deg) scale(1.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: rotate(360deg) scale(1);
+        opacity: 1;
+    }
+}
+
+/* ===== Accesibilidad Mejorada ===== */
+.ho-slider-control:focus,
+.ho-slider-dot:focus {
+    outline: 3px solid rgba(166, 49, 46, 0.8);
+    outline-offset: 5px;
+    box-shadow: 0 0 0 5px rgba(166, 49, 46, 0.2);
+}
+
+.ho-slider-control:focus-visible,
+.ho-slider-dot:focus-visible {
+    outline: 3px solid #a6312e;
+}
+
+/* Modo reducción de movimiento */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .ho-slide {
+        transform: none !important;
+    }
+
+    .ho-slide-image {
+        transform: none !important;
+    }
+}
+
+/* ===== Efecto Ken Burns (Zoom + Pan) - DESACTIVADO ===== */
+@keyframes kenBurns {
+    0% {
+        transform: scale(1) translate(0, 0);
+    }
+    100% {
+        transform: scale(1) translate(0, 0);
+    }
+}
+
+.ho-slide.active .ho-slide-image.ken-burns {
+    animation: none;
+    transform: scale(1);
+}
+
+/* ===== Overlay de Información Premium ===== */
+.ho-slide-content {
+    position: absolute;
+    bottom: 100px;
+    left: 60px;
+    right: 60px;
+    color: white;
+    z-index: 50;
+    opacity: 0;
+    transform: translateY(50px) rotateX(-15deg);
+    transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.3s;
+    transform-style: preserve-3d;
+}
+
+.ho-slide.active .ho-slide-content {
+    opacity: 1;
+    transform: translateY(0) rotateX(0deg);
+}
+
+.ho-slide-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+    text-shadow: 0 4px 30px rgba(0, 0, 0, 0.9);
+    background: linear-gradient(135deg, #fff, #a6312e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+    letter-spacing: -1px;
+}
+
+.ho-slide-description {
+    font-size: 1.3rem;
+    max-width: 600px;
+    text-shadow: 0 3px 15px rgba(0, 0, 0, 0.9);
+    line-height: 1.6;
+    font-weight: 300;
+    backdrop-filter: blur(5px);
+    padding: 15px 20px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border-left: 4px solid rgba(102, 126, 234, 0.8);
+}
+
+/* ===== Efecto Parallax en el Wrapper ===== */
+.ho-slider-wrapper:hover {
+    transform: translateY(-5px);
+}
+
+/* ===== Contador de Slides ===== */
+.ho-slider-counter {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(20px);
+    padding: 12px 20px;
+    border-radius: 50px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    z-index: 100;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.ho-slider-counter .current {
+    font-size: 1.5rem;
+    background: var(--slider-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.ho-slider-counter .separator {
+    margin: 0 8px;
+    opacity: 0.5;
+}
+
+.ho-slider-counter .total {
+    opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+    .ho-slide-content {
+        bottom: 70px;
+        left: 30px;
+        right: 30px;
+    }
+
+    .ho-slide-title {
+        font-size: 2.2rem;
+    }
+
+    .ho-slide-description {
+        font-size: 1.1rem;
+        padding: 12px 16px;
+    }
+
+    .ho-slider-counter {
+        top: 20px;
+        right: 20px;
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+
+    .ho-slider-counter .current {
+        font-size: 1.3rem;
     }
 }
 
 @media (max-width: 480px) {
+    .ho-slide-content {
+        bottom: 50px;
+        left: 20px;
+        right: 20px;
+    }
+
     .ho-slide-title {
-        font-size: 20px;
+        font-size: 1.8rem;
     }
 
     .ho-slide-description {
-        font-size: 13px;
+        font-size: 0.95rem;
+        padding: 10px 14px;
     }
+
+    .ho-slider-counter {
+        top: 15px;
+        right: 15px;
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+
+    .ho-slider-counter .current {
+        font-size: 1.1rem;
+    }
+}
+
+/* ===== Efecto de Reflejo (Glass Morphism Avanzado) ===== */
+.ho-slider-wrapper.glass-effect {
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* ===== Animación de entrada del contenedor ===== */
+@keyframes slideContainerIn {
+    0% {
+        opacity: 0;
+        transform: translateY(50px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.ho-slider-container.animate-in {
+    animation: slideContainerIn 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
 }

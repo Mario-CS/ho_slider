@@ -26,188 +26,332 @@
 * to avoid any conflicts with others containers.
 */
 
-document.addEventListener('DOMContentLoaded', function () {
-    const slider = document.getElementById('ho-slider');
+/**
+ * HO SLIDER - Modern Slider for PrestaShop
+ */
 
-    if (!slider) return;
+class HoSlider {
+    constructor(container, options = {}) {
+        // Configuración
+        this.config = {
+            autoplay: true,
+            autoplayDelay: 5000,
+            loop: true,
+            swipeThreshold: 50,
+            transitionDuration: 1000,
+            pauseOnHover: true,
+            keyboard: true,
+            ...options
+        };
 
-    const slides = slider.querySelectorAll('.ho-slide');
-    const dots = slider.querySelectorAll('.ho-slider-dot');
-    const prevBtn = slider.querySelector('.ho-slider-prev');
-    const nextBtn = slider.querySelector('.ho-slider-next');
+        // Elementos del DOM
+        this.container = typeof container === 'string'
+            ? document.querySelector(container)
+            : container;
 
-    if (slides.length <= 1) return; // No necesitamos slider si solo hay 1 slide
+        if (!this.container) {
+            console.error('HoSlider: Contenedor no encontrado');
+            return;
+        }
 
-    let currentSlide = 0;
-    let autoplayInterval = null;
-    let isPaused = false;
+        this.wrapper = this.container.querySelector('.ho-slider-wrapper');
+        this.slidesContainer = this.container.querySelector('.ho-slider-slides');
+        this.slides = Array.from(this.container.querySelectorAll('.ho-slide'));
+        this.prevBtn = this.container.querySelector('.ho-slider-prev');
+        this.nextBtn = this.container.querySelector('.ho-slider-next');
+        this.dots = Array.from(this.container.querySelectorAll('.ho-slider-dot'));
 
-    // Configuración desde PHP
-    const speed = typeof hoSliderSpeed !== 'undefined' ? hoSliderSpeed : 5000;
-    const autoplay = typeof hoSliderAutoplay !== 'undefined' ? hoSliderAutoplay : true;
-    const pauseOnHover = typeof hoSliderPauseOnHover !== 'undefined' ? hoSliderPauseOnHover : true;
+        // Estado
+        this.currentIndex = this.findActiveSlide();
+        this.isTransitioning = false;
+        this.autoplayTimer = null;
+        this.touchStartX = 0;
+        this.touchEndX = 0;
+        this.direction = 'next';
 
-    /**
-     * Ir a un slide específico
-     */
-    function goToSlide(index) {
-        // Remover clase active de todos
-        slides.forEach(slide => {
-            slide.classList.remove('active');
+        // Inicializar
+        this.init();
+    }
+
+    init() {
+        // Configurar slide inicial
+        this.updateSlides(false);
+
+        // Event listeners
+        this.attachEventListeners();
+
+        // Iniciar autoplay si está habilitado
+        if (this.config.autoplay) {
+            this.startAutoplay();
+        }
+    }
+
+    findActiveSlide() {
+        const activeSlide = this.slides.findIndex(slide =>
+            slide.classList.contains('active')
+        );
+        return activeSlide !== -1 ? activeSlide : 0;
+    }
+
+    attachEventListeners() {
+        // Navegación con botones
+        if (this.prevBtn) {
+            this.prevBtn.addEventListener('click', () => this.prev());
+        }
+        if (this.nextBtn) {
+            this.nextBtn.addEventListener('click', () => this.next());
+        }
+
+        // Navegación con dots
+        this.dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => this.goToSlide(index));
         });
-        dots.forEach(dot => {
-            dot.classList.remove('active');
+
+        // Navegación haciendo clic en las slides laterales
+        this.slides.forEach((slide) => {
+            slide.addEventListener('click', (e) => {
+                if (slide.classList.contains('prev')) {
+                    e.stopPropagation();
+                    this.prev();
+                } else if (slide.classList.contains('next')) {
+                    e.stopPropagation();
+                    this.next();
+                }
+            });
         });
 
-        // Añadir clase active al slide actual
-        currentSlide = index;
-        slides[currentSlide].classList.add('active');
-        dots[currentSlide].classList.add('active');
-    }
+        // Soporte táctil
+        this.wrapper.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: true });
+        this.wrapper.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: true });
+        this.wrapper.addEventListener('touchend', () => this.handleTouchEnd());
 
-    /**
-     * Ir al siguiente slide
-     */
-    function nextSlide() {
-        let next = currentSlide + 1;
-        if (next >= slides.length) {
-            next = 0;
+        // Pausar autoplay al pasar el mouse
+        if (this.config.pauseOnHover) {
+            this.wrapper.addEventListener('mouseenter', () => this.pauseAutoplay());
+            this.wrapper.addEventListener('mouseleave', () => this.resumeAutoplay());
         }
-        goToSlide(next);
-    }
 
-    /**
-     * Ir al slide anterior
-     */
-    function prevSlide() {
-        let prev = currentSlide - 1;
-        if (prev < 0) {
-            prev = slides.length - 1;
+        // Navegación por teclado
+        if (this.config.keyboard) {
+            document.addEventListener('keydown', (e) => this.handleKeyboard(e));
         }
-        goToSlide(prev);
-    }
 
-    /**
-     * Iniciar autoplay
-     */
-    function startAutoplay() {
-        if (autoplay && !isPaused) {
-            stopAutoplay(); // Limpiar cualquier intervalo existente
-            autoplayInterval = setInterval(nextSlide, speed);
-        }
-    }
-
-    /**
-     * Detener autoplay
-     */
-    function stopAutoplay() {
-        if (autoplayInterval) {
-            clearInterval(autoplayInterval);
-            autoplayInterval = null;
-        }
-    }
-
-    /**
-     * Pausar autoplay
-     */
-    function pauseAutoplay() {
-        isPaused = true;
-        stopAutoplay();
-    }
-
-    /**
-     * Reanudar autoplay
-     */
-    function resumeAutoplay() {
-        isPaused = false;
-        startAutoplay();
-    }
-
-    // Event listeners para botones
-    if (prevBtn) {
-        prevBtn.addEventListener('click', function () {
-            prevSlide();
-            stopAutoplay();
-            setTimeout(startAutoplay, speed * 2); // Reiniciar después de 2 ciclos
+        // Pausar cuando la pestaña no está visible
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                this.pauseAutoplay();
+            } else {
+                this.resumeAutoplay();
+            }
         });
     }
 
-    if (nextBtn) {
-        nextBtn.addEventListener('click', function () {
-            nextSlide();
-            stopAutoplay();
-            setTimeout(startAutoplay, speed * 2); // Reiniciar después de 2 ciclos
+    next() {
+        if (this.isTransitioning) return;
+
+        this.direction = 'next';
+        let nextIndex = this.currentIndex + 1;
+
+        if (nextIndex >= this.slides.length) {
+            nextIndex = this.config.loop ? 0 : this.currentIndex;
+        }
+
+        if (nextIndex !== this.currentIndex) {
+            this.goToSlide(nextIndex);
+        }
+    }
+
+    prev() {
+        if (this.isTransitioning) return;
+
+        this.direction = 'prev';
+        let prevIndex = this.currentIndex - 1;
+
+        if (prevIndex < 0) {
+            prevIndex = this.config.loop ? this.slides.length - 1 : this.currentIndex;
+        }
+
+        if (prevIndex !== this.currentIndex) {
+            this.goToSlide(prevIndex);
+        }
+    }
+
+    goToSlide(index, animate = true) {
+        if (this.isTransitioning || index === this.currentIndex) return;
+
+        this.isTransitioning = true;
+
+        // Determinar dirección
+        if (index > this.currentIndex) {
+            this.direction = 'next';
+        } else if (index < this.currentIndex) {
+            this.direction = 'prev';
+        }
+
+        // Actualizar índice actual
+        this.currentIndex = index;
+
+        // Actualizar slides
+        this.updateSlides(animate);
+
+        // Reiniciar autoplay
+        if (this.config.autoplay) {
+            this.restartAutoplay();
+        }
+
+        // Desbloquear después de la transición
+        setTimeout(() => {
+            this.isTransitioning = false;
+        }, this.config.transitionDuration);
+    }
+
+    updateSlides(animate = true) {
+        // Calcular índices de prev y next con loop
+        const prevIndex = this.currentIndex === 0 ? this.slides.length - 1 : this.currentIndex - 1;
+        const nextIndex = this.currentIndex === this.slides.length - 1 ? 0 : this.currentIndex + 1;
+
+        // Limpiar todas las clases y estilos inline
+        this.slides.forEach((slide) => {
+            slide.classList.remove('active', 'prev', 'next');
+            slide.style.transform = '';
+            slide.style.zIndex = '';
         });
-    }
 
-    // Event listeners para dots
-    dots.forEach((dot, index) => {
-        dot.addEventListener('click', function () {
-            goToSlide(index);
-            stopAutoplay();
-            setTimeout(startAutoplay, speed * 2); // Reiniciar después de 2 ciclos
+        // Aplicar clases según posición
+        this.slides.forEach((slide, index) => {
+            if (index === this.currentIndex) {
+                slide.classList.add('active');
+            } else if (index === prevIndex) {
+                slide.classList.add('prev');
+            } else if (index === nextIndex) {
+                slide.classList.add('next');
+            }
         });
-    });
 
-    // Pausar en hover
-    if (pauseOnHover) {
-        slider.addEventListener('mouseenter', pauseAutoplay);
-        slider.addEventListener('mouseleave', resumeAutoplay);
-    }
-
-    // Soporte para touch/swipe en móviles
-    let touchStartX = 0;
-    let touchEndX = 0;
-
-    slider.addEventListener('touchstart', function (e) {
-        touchStartX = e.changedTouches[0].screenX;
-    }, false);
-
-    slider.addEventListener('touchend', function (e) {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
-    }, false);
-
-    function handleSwipe() {
-        const swipeThreshold = 50; // Mínimo de píxeles para considerar un swipe
-
-        if (touchEndX < touchStartX - swipeThreshold) {
-            // Swipe izquierda - siguiente slide
-            nextSlide();
-            stopAutoplay();
-            setTimeout(startAutoplay, speed * 2);
-        }
-
-        if (touchEndX > touchStartX + swipeThreshold) {
-            // Swipe derecha - slide anterior
-            prevSlide();
-            stopAutoplay();
-            setTimeout(startAutoplay, speed * 2);
+        // Actualizar dots si existen
+        if (this.dots && this.dots.length > 0) {
+            this.dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === this.currentIndex);
+            });
         }
     }
 
-    // Soporte para teclado (accesibilidad)
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'ArrowLeft') {
-            prevSlide();
-            stopAutoplay();
-            setTimeout(startAutoplay, speed * 2);
-        } else if (e.key === 'ArrowRight') {
-            nextSlide();
-            stopAutoplay();
-            setTimeout(startAutoplay, speed * 2);
-        }
-    });
+    // ===== Autoplay =====
+    startAutoplay() {
+        if (!this.config.autoplay) return;
 
-    // Pausar cuando la página no es visible (optimización)
-    document.addEventListener('visibilitychange', function () {
-        if (document.hidden) {
-            pauseAutoplay();
-        } else {
-            resumeAutoplay();
-        }
-    });
+        this.autoplayTimer = setInterval(() => {
+            this.next();
+        }, this.config.autoplayDelay);
+    }
 
-    // Iniciar autoplay
-    startAutoplay();
+    pauseAutoplay() {
+        if (this.autoplayTimer) {
+            clearInterval(this.autoplayTimer);
+            this.autoplayTimer = null;
+        }
+    }
+
+    resumeAutoplay() {
+        if (this.config.autoplay && !this.autoplayTimer) {
+            this.startAutoplay();
+        }
+    }
+
+    restartAutoplay() {
+        this.pauseAutoplay();
+        this.startAutoplay();
+    }
+
+    // ===== Soporte Táctil =====
+    handleTouchStart(e) {
+        this.touchStartX = e.touches[0].clientX;
+    }
+
+    handleTouchMove(e) {
+        this.touchEndX = e.touches[0].clientX;
+    }
+
+    handleTouchEnd() {
+        const difference = this.touchStartX - this.touchEndX;
+
+        if (Math.abs(difference) > this.config.swipeThreshold) {
+            if (difference > 0) {
+                this.next();
+            } else {
+                this.prev();
+            }
+        }
+    }
+
+    // ===== Navegación por Teclado =====
+    handleKeyboard(e) {
+        // Solo responder si el slider está en el viewport
+        if (!this.isInViewport()) return;
+
+        switch (e.key) {
+            case 'ArrowLeft':
+                e.preventDefault();
+                this.prev();
+                break;
+            case 'ArrowRight':
+                e.preventDefault();
+                this.next();
+                break;
+            case 'Home':
+                e.preventDefault();
+                this.goToSlide(0);
+                break;
+            case 'End':
+                e.preventDefault();
+                this.goToSlide(this.slides.length - 1);
+                break;
+        }
+    }
+
+    isInViewport() {
+        const rect = this.container.getBoundingClientRect();
+        return (
+            rect.top >= 0 &&
+            rect.left >= 0 &&
+            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+        );
+    }
+
+    // ===== Métodos Públicos =====
+    destroy() {
+        this.pauseAutoplay();
+    }
+
+    getCurrentIndex() {
+        return this.currentIndex;
+    }
+
+    getTotalSlides() {
+        return this.slides.length;
+    }
+}
+
+// Inicialización automática cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', () => {
+    const sliderElement = document.querySelector('#ho-slider');
+
+    if (sliderElement) {
+        // Configuración desde variables PHP si existen
+        const config = {
+            autoplay: typeof hoSliderAutoplay !== 'undefined' ? hoSliderAutoplay : true,
+            autoplayDelay: typeof hoSliderSpeed !== 'undefined' ? hoSliderSpeed : 5000,
+            loop: true,
+            pauseOnHover: typeof hoSliderPauseOnHover !== 'undefined' ? hoSliderPauseOnHover : true,
+            keyboard: true,
+            swipeThreshold: 50
+        };
+
+        // Crear instancia del slider
+        const slider = new HoSlider(sliderElement, config);
+
+        // Hacer disponible globalmente
+        window.hoSlider = slider;
+    }
 });
