@@ -44,7 +44,7 @@
 /* ===== Contenedor Principal ===== */
 .ho-slider-container {
     max-width: 1200px; /* Reducido de 1600px */
-    margin: 60px auto;
+    margin: auto;
     padding: 0 40px;
     position: relative;
 }
@@ -53,9 +53,11 @@
     position: relative;
     width: 100%;
     overflow: visible;
-    border-radius: 30px;
+    border-radius: 20px;
     transform-style: preserve-3d;
     transition: transform 0.3s ease;
+    background: transparent; /* Sin fondo */
+    box-shadow: none; /* Sin sombra */
 }
 
 .ho-slider-wrapper::before {
@@ -93,9 +95,10 @@
     visibility: hidden;
     transform: scale(0.9);
     transition: opacity 0.6s ease, transform 0.6s ease, visibility 0s linear 0.6s;
-    border-radius: 30px;
+    border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    box-shadow: none; /* Sin sombra */
+    background: transparent; /* Sin fondo */
     pointer-events: none;
     z-index: 0;
 }
@@ -106,7 +109,7 @@
     transform: scale(1);
     transition: opacity 0.6s ease, transform 0.6s ease, visibility 0s linear 0s;
     z-index: 10;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: none; /* Sin sombra */
     pointer-events: auto;
 }
 
@@ -152,7 +155,8 @@
     height: 100%;
     display: block;
     object-fit: contain; /* Cambiado de cover a contain para que no se corten las imágenes */
-    background: #000; /* Fondo negro para las áreas vacías */
+    background: transparent; /* Sin fondo para no tener borde negro */
+    border-radius: 20px; /* Bordes redondeados */
 }
 
 /* Efecto de cristal/glass sobre la imagen - DESACTIVADO */
