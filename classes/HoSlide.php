@@ -41,6 +41,7 @@ class HoSlide extends ObjectModel
     public $legend;
     public $url;
     public $image;
+    public $image_mobile;
 
     /**
      * @see ObjectModel::$definition
@@ -83,6 +84,13 @@ class HoSlide extends ObjectModel
                 'lang' => true,
                 'validate' => 'isGenericName',
                 'size' => 255
+            ),
+            'image_mobile' => array(
+                'type' => self::TYPE_STRING,
+                'lang' => true,
+                'validate' => 'isGenericName',
+                'size' => 255,
+                'required' => false
             ),
         )
     );

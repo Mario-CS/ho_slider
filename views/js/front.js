@@ -266,20 +266,41 @@ class HoSlider {
     // ===== Soporte Táctil =====
     handleTouchStart(e) {
         this.touchStartX = e.touches[0].clientX;
+        this.touchStartY = e.touches[0].clientY;
     }
 
     handleTouchMove(e) {
         this.touchEndX = e.touches[0].clientX;
+        this.touchEndY = e.touches[0].clientY;
     }
 
     handleTouchEnd() {
-        const difference = this.touchStartX - this.touchEndX;
+        // Detectar si es móvil/tablet (≤768px)
+        const isMobile = window.innerWidth <= 768;
 
-        if (Math.abs(difference) > this.config.swipeThreshold) {
-            if (difference > 0) {
-                this.next();
-            } else {
-                this.prev();
+        if (isMobile) {
+            // Usar eje Y en móviles y tablets
+            const difference = this.touchStartY - this.touchEndY;
+
+            if (Math.abs(difference) > this.config.swipeThreshold) {
+                if (difference > 0) {
+                    // Swipe hacia arriba = siguiente
+                    this.next();
+                } else {
+                    // Swipe hacia abajo = anterior
+                    this.prev();
+                }
+            }
+        } else {
+            // Usar eje X en desktop
+            const difference = this.touchStartX - this.touchEndX;
+
+            if (Math.abs(difference) > this.config.swipeThreshold) {
+                if (difference > 0) {
+                    this.next();
+                } else {
+                    this.prev();
+                }
             }
         }
     }
@@ -289,23 +310,48 @@ class HoSlider {
         // Solo responder si el slider está en el viewport
         if (!this.isInViewport()) return;
 
-        switch (e.key) {
-            case 'ArrowLeft':
-                e.preventDefault();
-                this.prev();
-                break;
-            case 'ArrowRight':
-                e.preventDefault();
-                this.next();
-                break;
-            case 'Home':
-                e.preventDefault();
-                this.goToSlide(0);
-                break;
-            case 'End':
-                e.preventDefault();
-                this.goToSlide(this.slides.length - 1);
-                break;
+        const isMobile = window.innerWidth <= 768;
+
+        if (isMobile) {
+            // En móviles y tablets: usar flechas arriba/abajo
+            switch (e.key) {
+                case 'ArrowUp':
+                    e.preventDefault();
+                    this.prev();
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    this.next();
+                    break;
+                case 'Home':
+                    e.preventDefault();
+                    this.goToSlide(0);
+                    break;
+                case 'End':
+                    e.preventDefault();
+                    this.goToSlide(this.slides.length - 1);
+                    break;
+            }
+        } else {
+            // En desktop: usar flechas izquierda/derecha
+            switch (e.key) {
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    this.prev();
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    this.next();
+                    break;
+                case 'Home':
+                    e.preventDefault();
+                    this.goToSlide(0);
+                    break;
+                case 'End':
+                    e.preventDefault();
+                    this.goToSlide(this.slides.length - 1);
+                    break;
+            }
         }
     }
 

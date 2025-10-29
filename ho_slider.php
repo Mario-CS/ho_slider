@@ -327,6 +327,14 @@ class Ho_slider extends Module
                         'required' => !$idSlide // Obligatorio solo para nuevos slides
                     ),
                     array(
+                        'type' => 'file',
+                        'label' => $this->l('Imagen Móvil'),
+                        'name' => 'image_mobile',
+                        'accept' => '.jpg,.jpeg,.png,.gif,.webp',
+                        'desc' => $this->l('Imagen optimizada para móviles (≤768px). Si no se especifica, se usa la imagen principal.'),
+                        'required' => false
+                    ),
+                    array(
                         'type' => 'switch',
                         'label' => $this->l('Activo'),
                         'name' => 'active',
@@ -637,12 +645,14 @@ class Ho_slider extends Module
             mkdir($upload_dir, 0755, true);
         }
 
+        // Definir extensiones permitidas para ambos uploads
+        $allowed_extensions = array('jpg', 'jpeg', 'png', 'gif', 'webp');
+
         // Procesar imagen (un solo archivo para todos los idiomas)
         if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
             $file = $_FILES['image'];
             
             // Validar extensión de archivo
-            $allowed_extensions = array('jpg', 'jpeg', 'png', 'gif', 'webp');
             $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
             
             if (!in_array($extension, $allowed_extensions)) {
@@ -694,6 +704,52 @@ class Ho_slider extends Module
             // Si es nuevo slide, la imagen es obligatoria
             $_GET['addSlide'] = 1;
             return $this->displayError($this->l('Debe subir al menos una imagen'));
+        }
+        
+        // Procesar imagen móvil (opcional)
+        if (isset($_FILES['image_mobile']) && $_FILES['image_mobile']['error'] === UPLOAD_ERR_OK) {
+            $fileMobile = $_FILES['image_mobile'];
+            
+            // Validar extensión
+            $extensionMobile = strtolower(pathinfo($fileMobile['name'], PATHINFO_EXTENSION));
+            
+            if (!in_array($extensionMobile, $allowed_extensions)) {
+                $_GET['addSlide'] = 1;
+                return $this->displayError($this->l('Formato de imagen móvil no válido.'));
+            }
+            
+            // Validar que sea imagen
+            $imageMobileInfo = @getimagesize($fileMobile['tmp_name']);
+            if ($imageMobileInfo === false) {
+                $_GET['addSlide'] = 1;
+                return $this->displayError($this->l('El archivo de imagen móvil no es válido.'));
+            }
+            
+            // Validar tamaño
+            if ($fileMobile['size'] > 20 * 1024 * 1024) {
+                $_GET['addSlide'] = 1;
+                return $this->displayError($this->l('La imagen móvil es demasiado grande. Máximo: 20MB'));
+            }
+            
+            $filenameMobile = uniqid('slide_') . '_mobile.' . $extensionMobile;
+            
+            if (move_uploaded_file($fileMobile['tmp_name'], $upload_dir . $filenameMobile)) {
+                // Eliminar imágenes móviles anteriores si existen
+                if ($idSlide) {
+                    foreach ($languages as $lang) {
+                        $idLang = (int)$lang['id_lang'];
+                        if (isset($slide->image_mobile[$idLang]) && $slide->image_mobile[$idLang]) {
+                            @unlink($upload_dir . $slide->image_mobile[$idLang]);
+                        }
+                    }
+                }
+                
+                // Asignar la imagen móvil a todos los idiomas
+                foreach ($languages as $lang) {
+                    $idLang = (int)$lang['id_lang'];
+                    $slide->image_mobile[$idLang] = $filenameMobile;
+                }
+            }
         }
         
         if ($slide->save()) {

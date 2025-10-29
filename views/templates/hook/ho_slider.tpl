@@ -31,9 +31,21 @@
                     {if $slide.url}
                         <a href="{$slide.url|escape:'html':'UTF-8'}" class="ho-slide-link">
                         {/if}
-                        <img src="{$image_baseurl|escape:'html':'UTF-8'}{$slide.image|escape:'html':'UTF-8'}"
-                            alt="{if $slide.legend}{$slide.legend|escape:'html':'UTF-8'}{else}{$slide.title|escape:'html':'UTF-8'}{/if}"
-                            class="ho-slide-image">
+
+                        {* Usar picture con srcset para imágenes responsivas *}
+                        <picture class="ho-slide-picture">
+                            {* Imagen móvil para pantallas pequeñas (si existe) *}
+                            {if isset($slide.image_mobile) && $slide.image_mobile && $slide.image_mobile != ''}
+                                <source
+                                    srcset="{$image_baseurl|escape:'html':'UTF-8'}{$slide.image_mobile|escape:'html':'UTF-8'}"
+                                    media="(max-width: 768px)">
+                            {/if}
+
+                            {* Imagen desktop para pantallas grandes (siempre existe) *}
+                            <img src="{$image_baseurl|escape:'html':'UTF-8'}{$slide.image|escape:'html':'UTF-8'}"
+                                alt="{if $slide.legend}{$slide.legend|escape:'html':'UTF-8'}{else}{$slide.title|escape:'html':'UTF-8'}{/if}"
+                                class="ho-slide-image" loading="lazy">
+                        </picture>
 
                         {if $slide.title || $slide.description}
                             <div class="ho-slide-caption">
