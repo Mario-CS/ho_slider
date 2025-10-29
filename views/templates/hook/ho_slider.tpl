@@ -37,23 +37,9 @@
                             <img src="{$image_baseurl|escape:'html':'UTF-8'}{$slide.image|escape:'html':'UTF-8'}"
                                 data-desktop="{$image_baseurl|escape:'html':'UTF-8'}{$slide.image|escape:'html':'UTF-8'}"
                                 {if isset($slide.image_mobile) && $slide.image_mobile && $slide.image_mobile != ''}data-mobile="{$image_baseurl|escape:'html':'UTF-8'}{$slide.image_mobile|escape:'html':'UTF-8'}"
-                                {/if}
-                                alt="{if $slide.legend}{$slide.legend|escape:'html':'UTF-8'}{else}{$slide.title|escape:'html':'UTF-8'}{/if}"
-                                class="ho-slide-image" loading="lazy">
+                                {/if} alt="" class="ho-slide-image" loading="lazy">
                         </picture>
 
-                        {if $slide.title || $slide.description}
-                            <div class="ho-slide-caption">
-                                <div class="container">
-                                    {if $slide.title}
-                                        <h2 class="ho-slide-title">{$slide.title|escape:'html':'UTF-8'}</h2>
-                                    {/if}
-                                    {if $slide.description}
-                                        <div class="ho-slide-description">{$slide.description nofilter}</div>
-                                    {/if}
-                                </div>
-                            </div>
-                        {/if}
                         {if $slide.url}
                         </a>
                     {/if}

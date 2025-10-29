@@ -189,11 +189,9 @@ class Ho_slider extends Module
                 if (Validate::isLoadedObject($slide)) {
                     $slides = array(array(
                         'id_slide' => $slide->id_slide,
-                        'title' => $slide->title[$this->context->language->id],
-                        'description' => $slide->description[$this->context->language->id],
                         'url' => $slide->url[$this->context->language->id],
-                        'legend' => $slide->legend[$this->context->language->id],
                         'image' => $slide->image[$this->context->language->id],
+                        'image_mobile' => $slide->image_mobile[$this->context->language->id],
                         'active' => $slide->active
                     ));
                 } else {
@@ -286,37 +284,11 @@ class Ho_slider extends Module
                 'input' => array(
                     array(
                         'type' => 'text',
-                        'label' => $this->l('Título'),
-                        'name' => 'title',
-                        'lang' => true,
-                        'required' => false,
-                        'col' => 6,
-                        'hint' => $this->l('Título principal del slide (opcional)')
-                    ),
-                    array(
-                        'type' => 'textarea',
-                        'label' => $this->l('Descripción'),
-                        'name' => 'description',
-                        'lang' => true,
-                        'autoload_rte' => true,
-                        'col' => 6,
-                        'hint' => $this->l('Texto descriptivo del slide con formato enriquecido (opcional)')
-                    ),
-                    array(
-                        'type' => 'text',
                         'label' => $this->l('URL'),
                         'name' => 'url',
                         'lang' => true,
                         'col' => 6,
                         'hint' => $this->l('Enlace al hacer clic en el slide (opcional)')
-                    ),
-                    array(
-                        'type' => 'text',
-                        'label' => $this->l('Leyenda'),
-                        'name' => 'legend',
-                        'lang' => true,
-                        'col' => 6,
-                        'hint' => $this->l('Texto alternativo para accesibilidad (opcional)')
                     ),
                     array(
                         'type' => 'file',
@@ -422,18 +394,12 @@ class Ho_slider extends Module
         foreach (Language::getLanguages(false) as $lang) {
             $idLang = $lang['id_lang'];
             
-            if ($idSlide && isset($slide->title[$idLang])) {
+            if ($idSlide && isset($slide->url[$idLang])) {
                 // Si estamos editando, usar valores existentes
-                $helper->fields_value['title'][$idLang] = $slide->title[$idLang];
-                $helper->fields_value['description'][$idLang] = $slide->description[$idLang];
                 $helper->fields_value['url'][$idLang] = $slide->url[$idLang];
-                $helper->fields_value['legend'][$idLang] = $slide->legend[$idLang];
             } else {
                 // Si es nuevo, inicializar con valores vacíos
-                $helper->fields_value['title'][$idLang] = '';
-                $helper->fields_value['description'][$idLang] = '';
                 $helper->fields_value['url'][$idLang] = '';
-                $helper->fields_value['legend'][$idLang] = '';
             }
         }
 

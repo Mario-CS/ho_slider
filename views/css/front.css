@@ -188,9 +188,10 @@
     width: 100%;
     height: 100%;
     display: block;
-    object-fit: contain; /* Cambiado de cover a contain para que no se corten las imágenes */
-    background: transparent; /* Sin fondo para no tener borde negro */
-    border-radius: 20px; /* Bordes redondeados */
+    object-fit: cover; /* Llenar todo el espacio sin distorsión */
+    object-position: center; /* Centrar la imagen */
+    background: transparent;
+    border-radius: 20px;
 }
 
 /* Efecto de cristal/glass sobre la imagen - DESACTIVADO */

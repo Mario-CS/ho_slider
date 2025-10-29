@@ -36,9 +36,6 @@ class HoSlide extends ObjectModel
     public $active;
     
     // Multilang fields
-    public $title;
-    public $description;
-    public $legend;
     public $url;
     public $image;
     public $image_mobile;
@@ -56,28 +53,12 @@ class HoSlide extends ObjectModel
             'active' => array('type' => self::TYPE_BOOL, 'validate' => 'isBool'),
             
             // Multilang fields
-            'title' => array(
-                'type' => self::TYPE_STRING,
-                'lang' => true,
-                'validate' => 'isGenericName',
-                'size' => 255
-            ),
-            'description' => array(
-                'type' => self::TYPE_HTML,
-                'lang' => true,
-                'validate' => 'isCleanHtml'
-            ),
-            'legend' => array(
-                'type' => self::TYPE_STRING,
-                'lang' => true,
-                'validate' => 'isGenericName',
-                'size' => 255
-            ),
             'url' => array(
                 'type' => self::TYPE_STRING,
                 'lang' => true,
                 'validate' => 'isUrl',
-                'size' => 255
+                'size' => 255,
+                'required' => false
             ),
             'image' => array(
                 'type' => self::TYPE_STRING,
