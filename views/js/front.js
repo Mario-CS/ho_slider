@@ -77,6 +77,9 @@ class HoSlider {
         // Configurar slide inicial
         this.updateSlides(false);
 
+        // Cambiar imágenes según resolución
+        this.switchResponsiveImages();
+
         // Event listeners
         this.attachEventListeners();
 
@@ -84,6 +87,25 @@ class HoSlider {
         if (this.config.autoplay) {
             this.startAutoplay();
         }
+    }
+
+    switchResponsiveImages() {
+        const isMobile = window.innerWidth <= 768;
+
+        this.slides.forEach(slide => {
+            const img = slide.querySelector('.ho-slide-image');
+            if (!img) return;
+
+            const mobileUrl = img.getAttribute('data-mobile');
+            const desktopUrl = img.getAttribute('data-desktop');
+
+            // Cambiar imagen según el tamaño de pantalla
+            if (isMobile && mobileUrl) {
+                img.setAttribute('src', mobileUrl);
+            } else if (desktopUrl) {
+                img.setAttribute('src', desktopUrl);
+            }
+        });
     }
 
     findActiveSlide() {
@@ -143,6 +165,15 @@ class HoSlider {
             } else {
                 this.resumeAutoplay();
             }
+        });
+
+        // Cambiar imágenes cuando se redimensiona la ventana
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                this.switchResponsiveImages();
+            }, 250);
         });
     }
 
