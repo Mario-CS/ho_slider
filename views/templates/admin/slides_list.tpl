@@ -48,7 +48,7 @@
                     <div class="ho-slide-image-wrapper">
                         {if $slide.image}
                             <img src="{$image_baseurl|escape:'html':'UTF-8'}{$slide.image|escape:'html':'UTF-8'}"
-                                alt="{$slide.title|escape:'html':'UTF-8'}">
+                                alt="Slide #{$slide.id_slide|escape:'html':'UTF-8'}">
                         {else}
                             <div class="ho-slide-no-image">
                                 <span class="text-muted">{l s='Sin imagen' mod='ho_slider'}</span>
@@ -59,11 +59,8 @@
                     <!-- Información del slide -->
                     <div class="ho-slide-info">
                         <h4>
-                            #{$slide.id_slide|escape:'html':'UTF-8'} - {$slide.title|escape:'html':'UTF-8'}
+                            Slide #{$slide.id_slide|escape:'html':'UTF-8'}
                         </h4>
-                        {if $slide.description}
-                            <p class="ho-slide-description">{$slide.description|escape:'html':'UTF-8'}</p>
-                        {/if}
                         {if $slide.url}
                             <p class="ho-slide-url">
                                 <i class="icon-link"></i> {$slide.url|escape:'html':'UTF-8'}
@@ -73,12 +70,7 @@
 
                     <!-- Botones de acción -->
                     <div class="ho-slide-actions">
-                        <!-- Columna 1 -->
-                        <button type="button" class="btn btn-info ho-preview-btn" data-slide-id="{$slide.id_slide|intval}"
-                            title="{l s='Vista Previa' mod='ho_slider'}">
-                            <i class="icon-eye"></i> {l s='Vista Previa' mod='ho_slider'}
-                        </button>
-
+                        <!-- Columna Izquierda -->
                         <a href="{$current_index|escape:'html':'UTF-8'}&updateSlide=1&id_slide={$slide.id_slide|intval}&token={$token|escape:'html':'UTF-8'}"
                             class="btn btn-default" title="{l s='Modificar' mod='ho_slider'}">
                             <i class="icon-edit"></i> {l s='Modificar' mod='ho_slider'}
@@ -89,7 +81,7 @@
                             <i class="icon-copy"></i> {l s='Duplicar' mod='ho_slider'}
                         </a>
 
-                        <!-- Columna 2 -->
+                        <!-- Columna Derecha -->
                         {if $slide.active}
                             <a href="{$current_index|escape:'html':'UTF-8'}&statusSlide=1&id_slide={$slide.id_slide|intval}&token={$token|escape:'html':'UTF-8'}"
                                 class="btn btn-success" title="{l s='Activado - Click para desactivar' mod='ho_slider'}">
@@ -116,28 +108,5 @@
                 {l s='No hay slides creados. Añade tu primer slide usando el botón de arriba.' mod='ho_slider'}
             </div>
         {/if}
-    </div>
-</div>
-
-<!-- Modal de Vista Previa -->
-<div id="hoSliderPreviewModal" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">
-                    <i class="icon-eye"></i> {l s='Vista Previa del Slider' mod='ho_slider'}
-                </h4>
-            </div>
-            <div class="modal-body">
-                <!-- El contenido del slider se cargará aquí dinámicamente -->
-                <div id="hoSliderPreviewContent"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">
-                    <i class="icon-remove"></i> {l s='Cerrar' mod='ho_slider'}
-                </button>
-            </div>
-        </div>
     </div>
 </div>

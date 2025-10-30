@@ -38,8 +38,8 @@ class HoSlider {
             autoplayDelay: 5000,
             loop: true,
             swipeThreshold: 50,
-            transitionDuration: 1000,
-            pauseOnHover: true,
+            transitionDuration: 600,
+            keyboard: true,
             keyboard: true,
             ...options
         };
@@ -67,7 +67,17 @@ class HoSlider {
         this.autoplayTimer = null;
         this.touchStartX = 0;
         this.touchEndX = 0;
+        this.touchStartY = 0;
+        this.touchEndY = 0;
         this.direction = 'next';
+
+        // Variables para drag con mouse (desktop)
+        this.isDragging = false;
+        this.dragStartX = 0;
+        this.dragStartY = 0;
+        this.dragEndX = 0;
+        this.dragEndY = 0;
+        this.hasDragged = false; // Flag para saber si realmente se arrastró
 
         // Inicializar
         this.init();
@@ -129,23 +139,30 @@ class HoSlider {
             dot.addEventListener('click', () => this.goToSlide(index));
         });
 
-        // Navegación haciendo clic en las slides laterales
-        this.slides.forEach((slide) => {
-            slide.addEventListener('click', (e) => {
-                if (slide.classList.contains('prev')) {
-                    e.stopPropagation();
-                    this.prev();
-                } else if (slide.classList.contains('next')) {
-                    e.stopPropagation();
-                    this.next();
-                }
-            });
-        });
-
         // Soporte táctil
-        this.wrapper.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: true });
-        this.wrapper.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: true });
+        this.wrapper.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
+        this.wrapper.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
         this.wrapper.addEventListener('touchend', () => this.handleTouchEnd());
+
+        // Soporte para arrastrar con mouse (desktop)
+        this.wrapper.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+        this.wrapper.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+        this.wrapper.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+        this.wrapper.addEventListener('mouseleave', (e) => this.handleMouseUp(e));
+
+        // Prevenir comportamiento por defecto de arrastrar imágenes
+        this.wrapper.addEventListener('dragstart', (e) => e.preventDefault());
+
+        // Interceptar clics en enlaces para prevenir navegación si se arrastró
+        this.wrapper.addEventListener('click', (e) => {
+            if (this.hasDragged) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                this.hasDragged = false; // Reset el flag
+                return false;
+            }
+        }, true); // Usar capture phase para interceptar antes
 
         // Pausar autoplay al pasar el mouse
         if (this.config.pauseOnHover) {
@@ -178,8 +195,6 @@ class HoSlider {
     }
 
     next() {
-        if (this.isTransitioning) return;
-
         this.direction = 'next';
         let nextIndex = this.currentIndex + 1;
 
@@ -193,8 +208,6 @@ class HoSlider {
     }
 
     prev() {
-        if (this.isTransitioning) return;
-
         this.direction = 'prev';
         let prevIndex = this.currentIndex - 1;
 
@@ -208,7 +221,15 @@ class HoSlider {
     }
 
     goToSlide(index, animate = true) {
-        if (this.isTransitioning || index === this.currentIndex) return;
+        if (index === this.currentIndex) return;
+
+        // Permitir interrumpir transición si se solicita un cambio rápido
+        if (this.isTransitioning) {
+            // Cancelar el timeout anterior
+            if (this.transitionTimeout) {
+                clearTimeout(this.transitionTimeout);
+            }
+        }
 
         this.isTransitioning = true;
 
@@ -231,8 +252,9 @@ class HoSlider {
         }
 
         // Desbloquear después de la transición
-        setTimeout(() => {
+        this.transitionTimeout = setTimeout(() => {
             this.isTransitioning = false;
+            this.transitionTimeout = null;
         }, this.config.transitionDuration);
     }
 
@@ -241,11 +263,14 @@ class HoSlider {
         const prevIndex = this.currentIndex === 0 ? this.slides.length - 1 : this.currentIndex - 1;
         const nextIndex = this.currentIndex === this.slides.length - 1 ? 0 : this.currentIndex + 1;
 
-        // Limpiar todas las clases y estilos inline
+        // Limpiar todas las clases y estilos inline de TODOS los slides
         this.slides.forEach((slide) => {
             slide.classList.remove('active', 'prev', 'next');
             slide.style.transform = '';
             slide.style.zIndex = '';
+            slide.style.opacity = '';
+            slide.style.transition = '';
+            slide.style.visibility = '';
         });
 
         // Aplicar clases según posición
@@ -270,6 +295,9 @@ class HoSlider {
     // ===== Autoplay =====
     startAutoplay() {
         if (!this.config.autoplay) return;
+
+        // Limpiar cualquier intervalo existente antes de crear uno nuevo
+        this.pauseAutoplay();
 
         this.autoplayTimer = setInterval(() => {
             this.next();
@@ -298,35 +326,222 @@ class HoSlider {
     handleTouchStart(e) {
         this.touchStartX = e.touches[0].clientX;
         this.touchStartY = e.touches[0].clientY;
+        this.isTouchScrolling = null; // Resetear estado
+
+        // Pausar autoplay mientras se desliza
+        this.pauseAutoplay();
     }
 
     handleTouchMove(e) {
         this.touchEndX = e.touches[0].clientX;
         this.touchEndY = e.touches[0].clientY;
+
+        const isMobile = window.innerWidth <= 768;
+
+        // Calcular el desplazamiento en ambos ejes
+        const deltaX = Math.abs(this.touchEndX - this.touchStartX);
+        const deltaY = Math.abs(this.touchEndY - this.touchStartY);
+
+        // Determinar dirección en el primer movimiento significativo
+        if (this.isTouchScrolling === null && (deltaX > 5 || deltaY > 5)) {
+            if (isMobile) {
+                // En móvil: si hay más movimiento vertical = slider (prevenir scroll)
+                // Si hay más movimiento horizontal = scroll de página (permitir)
+                this.isTouchScrolling = deltaX > deltaY; // true = permitir scroll, false = slider
+            } else {
+                // En desktop: si hay más movimiento horizontal = slider (prevenir scroll)
+                // Si hay más movimiento vertical = scroll de página (permitir)
+                this.isTouchScrolling = deltaY > deltaX; // true = permitir scroll, false = slider
+            }
+        }
+
+        // Si es interacción con el slider, prevenir scroll de la página SIEMPRE
+        if (this.isTouchScrolling === false) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // Añadir animación visual durante el swipe solo si es slider
+        if (this.isTouchScrolling === false) {
+            const activeSlide = this.slides[this.currentIndex];
+
+            if (activeSlide) {
+                if (isMobile) {
+                    // En móviles: desplazamiento vertical
+                    const deltaY = this.touchEndY - this.touchStartY;
+                    const maxMove = 100;
+                    const movePercent = Math.max(-maxMove, Math.min(maxMove, deltaY));
+
+                    activeSlide.style.transition = 'none';
+                    activeSlide.style.transform = `translateY(${movePercent}px) scale(${1 - Math.abs(movePercent) / 1000})`;
+                    activeSlide.style.opacity = 1 - Math.abs(movePercent) / 500;
+                } else {
+                    // En desktop: desplazamiento horizontal
+                    const deltaX = this.touchEndX - this.touchStartX;
+                    const maxMove = 100;
+                    const movePercent = Math.max(-maxMove, Math.min(maxMove, deltaX));
+
+                    activeSlide.style.transition = 'none';
+                    activeSlide.style.transform = `translateX(${movePercent}px) scale(${1 - Math.abs(movePercent) / 1000})`;
+                    activeSlide.style.opacity = 1 - Math.abs(movePercent) / 500;
+                }
+            }
+        }
     }
 
     handleTouchEnd() {
-        // Detectar si es móvil/tablet (≤768px)
-        const isMobile = window.innerWidth <= 768;
+        // Solo procesar si fue interacción con el slider (no scroll de página)
+        if (this.isTouchScrolling === false) {
+            // Restaurar el slide activo con transición suave
+            const activeSlide = this.slides[this.currentIndex];
+            if (activeSlide) {
+                activeSlide.style.transition = 'all 0.2s ease';
+                activeSlide.style.transform = '';
+                activeSlide.style.opacity = '';
+            }
 
-        if (isMobile) {
-            // Usar eje Y en móviles y tablets
-            const difference = this.touchStartY - this.touchEndY;
+            // Detectar si es móvil/tablet (≤768px)
+            const isMobile = window.innerWidth <= 768;
 
-            if (Math.abs(difference) > this.config.swipeThreshold) {
-                if (difference > 0) {
-                    // Swipe hacia arriba = siguiente
-                    this.next();
-                } else {
-                    // Swipe hacia abajo = anterior
-                    this.prev();
+            if (isMobile) {
+                // Usar eje Y en móviles y tablets
+                const difference = this.touchStartY - this.touchEndY;
+
+                if (Math.abs(difference) > this.config.swipeThreshold) {
+                    if (difference > 0) {
+                        // Swipe hacia arriba = siguiente
+                        this.next();
+                    } else {
+                        // Swipe hacia abajo = anterior
+                        this.prev();
+                    }
+                }
+            } else {
+                // Usar eje X en desktop
+                const difference = this.touchStartX - this.touchEndX;
+
+                if (Math.abs(difference) > this.config.swipeThreshold) {
+                    if (difference > 0) {
+                        this.next();
+                    } else {
+                        this.prev();
+                    }
                 }
             }
-        } else {
-            // Usar eje X en desktop
-            const difference = this.touchStartX - this.touchEndX;
+        }
 
-            if (Math.abs(difference) > this.config.swipeThreshold) {
+        // Reiniciar autoplay después de deslizar
+        this.startAutoplay();
+
+        // Resetear estado
+        this.isTouchScrolling = null;
+    }
+
+    // ===== Soporte para Mouse (Desktop) =====
+    handleMouseDown(e) {
+        // Solo activar si no se está haciendo clic en un botón o dot
+        if (e.target.closest('.ho-slider-control') || e.target.closest('.ho-slider-dot')) {
+            return;
+        }
+
+        this.isDragging = true;
+        this.hasDragged = false;
+        this.dragStartX = e.clientX;
+        this.dragStartY = e.clientY;
+        this.dragEndX = e.clientX;
+        this.dragEndY = e.clientY;
+        this.wrapper.style.cursor = 'grabbing';
+
+        // Pausar autoplay mientras se arrastra
+        this.pauseAutoplay();
+    }
+
+    handleMouseMove(e) {
+        if (!this.isDragging) return;
+
+        this.dragEndX = e.clientX;
+        this.dragEndY = e.clientY;
+
+        // Marcar que se ha arrastrado si se movió más de 5px
+        const dragDistanceX = Math.abs(this.dragStartX - this.dragEndX);
+        const dragDistanceY = Math.abs(this.dragStartY - this.dragEndY);
+
+        if (dragDistanceX > 5 || dragDistanceY > 5) {
+            this.hasDragged = true;
+            // Prevenir el comportamiento por defecto mientras se arrastra
+            e.preventDefault();
+        }
+
+        // Calcular la distancia del arrastre
+        const isMobile = window.innerWidth <= 768;
+        const activeSlide = this.slides[this.currentIndex];
+
+        if (activeSlide) {
+            if (isMobile) {
+                // En móviles: desplazamiento vertical
+                const deltaY = this.dragEndY - this.dragStartY;
+                const maxMove = 100;
+                const movePercent = Math.max(-maxMove, Math.min(maxMove, deltaY));
+
+                activeSlide.style.transition = 'none';
+                activeSlide.style.transform = `translateY(${movePercent}px) scale(${1 - Math.abs(movePercent) / 1000})`;
+                activeSlide.style.opacity = 1 - Math.abs(movePercent) / 500;
+            } else {
+                // En desktop: desplazamiento horizontal
+                const deltaX = this.dragEndX - this.dragStartX;
+                const maxMove = 100;
+                const movePercent = Math.max(-maxMove, Math.min(maxMove, deltaX));
+
+                activeSlide.style.transition = 'none';
+                activeSlide.style.transform = `translateX(${movePercent}px) scale(${1 - Math.abs(movePercent) / 1000})`;
+                activeSlide.style.opacity = 1 - Math.abs(movePercent) / 500;
+            }
+        }
+    } handleMouseUp(e) {
+        if (!this.isDragging) return;
+
+        this.isDragging = false;
+        this.wrapper.style.cursor = '';
+
+        const isMobile = window.innerWidth <= 768;
+        const dragDistanceX = Math.abs(this.dragStartX - this.dragEndX);
+        const dragDistanceY = Math.abs(this.dragStartY - this.dragEndY);
+        const totalDistance = isMobile ? dragDistanceY : dragDistanceX;
+
+        // Restaurar el slide activo con transición suave
+        const activeSlide = this.slides[this.currentIndex];
+        if (activeSlide) {
+            activeSlide.style.transition = 'all 0.2s ease';
+            activeSlide.style.transform = '';
+            activeSlide.style.opacity = '';
+        }
+
+        // < 5px: Click normal (permite enlace)
+        if (totalDistance < 5) {
+            this.hasDragged = false;
+            // Reiniciar autoplay incluso si no se arrastró
+            this.startAutoplay();
+            return;
+        }
+
+        // >= 5px: Previene enlace
+        this.hasDragged = true;
+        e.preventDefault();
+        e.stopPropagation();
+
+        // >= 20px: Cambia slide
+        if (totalDistance >= 20) {
+            if (isMobile) {
+                // Usar eje Y en móviles
+                const difference = this.dragStartY - this.dragEndY;
+                if (difference > 0) {
+                    this.next();
+                } else {
+                    this.prev();
+                }
+            } else {
+                // Usar eje X en desktop
+                const difference = this.dragStartX - this.dragEndX;
                 if (difference > 0) {
                     this.next();
                 } else {
@@ -334,6 +549,21 @@ class HoSlider {
                 }
             }
         }
+
+        // Resetear posiciones después de un pequeño delay
+        setTimeout(() => {
+            this.dragStartX = 0;
+            this.dragStartY = 0;
+            this.dragEndX = 0;
+            this.dragEndY = 0;
+            // Resetear hasDragged después de que el evento click se haya procesado
+            setTimeout(() => {
+                this.hasDragged = false;
+            }, 50);
+        }, 10);
+
+        // Reiniciar autoplay después de arrastrar
+        this.startAutoplay();
     }
 
     // ===== Navegación por Teclado =====

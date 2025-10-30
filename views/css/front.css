@@ -58,6 +58,12 @@
     transition: transform 0.3s ease;
     background: transparent; /* Sin fondo */
     box-shadow: none; /* Sin sombra */
+    cursor: grab; /* Indicar que se puede arrastrar */
+    user-select: none; /* Prevenir selección de texto al arrastrar */
+}
+
+.ho-slider-wrapper:active {
+    cursor: grabbing; /* Cambiar cursor mientras se arrastra */
 }
 
 .ho-slider-wrapper::before {
@@ -115,7 +121,7 @@
 
 /* Slides prev/next visibles por detrás y clicables */
 .ho-slide.prev {
-    opacity: 0.5;
+    opacity: 0.7;
     visibility: visible;
     transform: scale(0.85) translateX(-15%);
     transition: opacity 0.6s ease, transform 0.6s ease, visibility 0s linear 0s;
@@ -126,12 +132,12 @@
 }
 
 .ho-slide.prev:hover {
-    opacity: 0.7;
+    opacity: 0.85;
     filter: brightness(0.85);
 }
 
 .ho-slide.next {
-    opacity: 0.5;
+    opacity: 0.7;
     visibility: visible;
     transform: scale(0.85) translateX(15%);
     transition: opacity 0.6s ease, transform 0.6s ease, visibility 0s linear 0s;
@@ -142,7 +148,7 @@
 }
 
 .ho-slide.next:hover {
-    opacity: 0.7;
+    opacity: 0.85;
     filter: brightness(0.85);
 }
 
@@ -151,14 +157,14 @@
     /* Cambiar a movimiento vertical */
     .ho-slide.prev {
         transform: scale(0.85) translateY(-20%) !important;
-        opacity: 0.5 !important;
+        opacity: 0.7 !important;
         border-radius: 20px;
         filter: brightness(0.7) !important;
     }
 
     .ho-slide.next {
         transform: scale(0.85) translateY(20%) !important;
-        opacity: 0.5 !important;
+        opacity: 0.7 !important;
         border-radius: 20px;
         filter: brightness(0.7) !important;
     }

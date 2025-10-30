@@ -179,53 +179,6 @@ class Ho_slider extends Module
                 'success' => $success,
                 'message' => $success ? 'Positions updated' : 'Error updating positions'
             ]);
-        } elseif ($action === 'getSliderPreview') {
-            // Vista previa del slider
-            $idSlide = (int)Tools::getValue('id_slide');
-            
-            if ($idSlide > 0) {
-                // Vista previa de UN slide específico
-                $slide = new HoSlide($idSlide);
-                if (Validate::isLoadedObject($slide)) {
-                    $slides = array(array(
-                        'id_slide' => $slide->id_slide,
-                        'url' => $slide->url[$this->context->language->id],
-                        'image' => $slide->image[$this->context->language->id],
-                        'image_mobile' => $slide->image_mobile[$this->context->language->id],
-                        'active' => $slide->active
-                    ));
-                } else {
-                    $slides = array();
-                }
-            } else {
-                // Vista previa de TODOS los slides activos
-                $slides = HoSlide::getSlides(
-                    $this->context->language->id,
-                    $this->context->shop->id,
-                    true
-                );
-            }
-            
-            if (empty($slides)) {
-                echo '<div class="alert alert-warning ho-preview-alert-warning">
-                    <i class="icon-warning"></i> No hay slides para mostrar en la vista previa.
-                </div>';
-                return;
-            }
-            
-            // Asignar variables al Smarty
-            $this->context->smarty->assign(array(
-                'slides' => $slides,
-                'image_baseurl' => $this->context->link->getBaseLink() . 'img/ho_slider/',
-                'is_preview' => true
-            ));
-            
-            // Nota: No cargamos front.css aquí para evitar que afecte a todo el BackOffice.
-            // Los estilos específicos de la vista previa están en back.css con el prefijo
-            // #hoSliderPreviewContent para aislarlos.
-            
-            // Renderizar el template del slider
-            echo $this->display(__FILE__, 'views/templates/hook/ho_slider.tpl');
         } else {
             header('Content-Type: application/json');
             echo json_encode(['success' => false, 'message' => 'Unknown action']);
@@ -295,7 +248,7 @@ class Ho_slider extends Module
                         'label' => $this->l('Imagen'),
                         'name' => 'image',
                         'accept' => '.jpg,.jpeg,.png,.gif,.webp',
-                        'desc' => $this->l('Formatos permitidos: JPG, PNG, GIF, WebP. Tamaño máximo: 20MB'),
+                        'desc' => $this->l('Formatos permitidos: JPG, PNG, GIF, WebP. Tamaño máximo: 20MB. Resolucion recomendada: 1000 x 400px.'),
                         'required' => !$idSlide // Obligatorio solo para nuevos slides
                     ),
                     array(
@@ -463,13 +416,7 @@ class Ho_slider extends Module
 
         foreach ($languages as $lang) {
             $idLang = (int)$lang['id_lang'];
-            // Añadir sufijo " (copia)" al título, respetando el límite de 255 chars
-            $newTitle = (string)$original->title[$idLang];
-            $newTitle = Tools::substr($newTitle . ' (copia)', 0, 255);
-            $new->title[$idLang] = $newTitle;
-            $new->description[$idLang] = (string)$original->description[$idLang];
             $new->url[$idLang] = (string)$original->url[$idLang];
-            $new->legend[$idLang] = (string)$original->legend[$idLang];
             $new->image[$idLang] = $newFilename ?: '';
         }
 
@@ -589,10 +536,7 @@ class Ho_slider extends Module
 
         foreach ($languages as $lang) {
             $idLang = (int)$lang['id_lang'];
-            $slide->title[$idLang] = Tools::getValue('title_' . $idLang, '');
-            $slide->description[$idLang] = Tools::getValue('description_' . $idLang, '');
             $slide->url[$idLang] = Tools::getValue('url_' . $idLang, '');
-            $slide->legend[$idLang] = Tools::getValue('legend_' . $idLang, '');
             
             // Mantener imagen existente si no se sube una nueva
             if ($idSlide && isset($slide->image[$idLang]) && $slide->image[$idLang]) {

@@ -36,11 +36,9 @@ $sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'ho_slider` (
 $sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'ho_slider_lang` (
     `id_slide` int(11) NOT NULL,
     `id_lang` int(11) NOT NULL,
-    `title` varchar(255) NOT NULL,
-    `description` text,
-    `legend` varchar(255),
     `url` varchar(255),
     `image` varchar(255) NOT NULL,
+    `image_mobile` varchar(255),
     PRIMARY KEY (`id_slide`, `id_lang`)
 ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;';
 
