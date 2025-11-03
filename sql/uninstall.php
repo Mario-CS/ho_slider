@@ -24,6 +24,10 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+
 /**
  * In some cases you should not drop the tables.
  * Maybe the merchant will just try to reset the module
