@@ -248,15 +248,25 @@ class Ho_slider extends Module
                         'label' => $this->l('Image'),
                         'name' => 'image',
                         'accept' => '.jpg,.jpeg,.png,.gif,.webp',
-                        'desc' => $this->l('Allowed formats: JPG, PNG, GIF, WebP. Max size: 20MB. Recommended resolution: 1000 x 400px.'),
-                        'required' => !$idSlide // Required only for new slides
+                        'desc' => $idSlide && isset($slide->image[$this->context->language->id]) 
+                            ? $this->l('Current image: ') . $slide->image[$this->context->language->id] . '. ' . $this->l('Upload a new file to replace it.')
+                            : $this->l('Allowed formats: JPG, PNG, GIF, WebP. Max size: 20MB. Recommended resolution: 1000 x 400px.'),
+                        'required' => !$idSlide,
+                        'image' => $idSlide && isset($slide->image[$this->context->language->id]) 
+                            ? $this->context->link->getBaseLink() . 'img/ho_slider/' . $slide->image[$this->context->language->id]
+                            : null,
+                        'thumb' => $idSlide && isset($slide->image[$this->context->language->id]) 
+                            ? $this->context->link->getBaseLink() . 'img/ho_slider/' . $slide->image[$this->context->language->id]
+                            : null
                     ),
                     array(
                         'type' => 'file',
                         'label' => $this->l('Mobile Image'),
                         'name' => 'image_mobile',
                         'accept' => '.jpg,.jpeg,.png,.gif,.webp',
-                        'desc' => $this->l('Optimized image for mobile (≤768px). If not specified, the main image will be used.'),
+                        'desc' => $idSlide && isset($slide->image_mobile[$this->context->language->id]) && $slide->image_mobile[$this->context->language->id]
+                            ? $this->l('Current mobile image: ') . $slide->image_mobile[$this->context->language->id] . '. ' . $this->l('Upload a new file to replace it.')
+                            : $this->l('Optimized image for mobile (≤768px). If not specified, the main image will be used.'),
                         'required' => false
                     ),
                     array(
@@ -294,22 +304,6 @@ class Ho_slider extends Module
             )
         );
 
-        // If editing, show current image
-        if ($idSlide && isset($slide->image[$this->context->language->id])) {
-            $image_url = $this->context->link->getBaseLink() . 'img/ho_slider/' . $slide->image[$this->context->language->id];
-            $fields_form['form']['input'][] = array(
-                'type' => 'html',
-                'name' => 'current_image',
-                'html_content' => '<div class="form-group">
-                    <label class="control-label col-lg-3">' . $this->l('Current image') . '</label>
-                    <div class="col-lg-9">
-                        <img src="' . $image_url . '" class="ho-form-image-preview" />
-                        <p class="help-block">' . $this->l('Upload a new image to replace the current one') . '</p>
-                    </div>
-                </div>'
-            );
-        }
-
         $helper = new HelperForm();
         $helper->module = $this;
         $helper->name_controller = $this->name;
@@ -324,14 +318,13 @@ class Ho_slider extends Module
         
         // Importante: establecer los idiomas disponibles
         $languages = Language::getLanguages(false);
-        $helper->languages = $languages;
-        $helper->id_language = $this->context->language->id;
         
         // Configurar el idioma por defecto para evitar el error "is_default"
         foreach ($languages as &$language) {
             $language['is_default'] = ($language['id_lang'] == $helper->default_form_language) ? 1 : 0;
         }
         unset($language);
+        
         $helper->languages = $languages;
 
         // Valores del formulario
@@ -366,8 +359,7 @@ class Ho_slider extends Module
 
         $formHtml = $helper->generateForm(array($fields_form));
 
-        // Envolver el formulario con un div con ID para hacer scroll
-        return '<div id="add_slide_form">' . $formHtml . '</div>';
+        return $formHtml;
     }
 
     /**
@@ -749,8 +741,24 @@ class Ho_slider extends Module
      */
     public function hookHeader()
     {
-        $this->context->controller->addJS($this->_path.'views/js/front.js');
-        $this->context->controller->addCSS($this->_path.'views/css/front.css');
+        // Registrar CSS y JS del slider
+        $this->context->controller->registerStylesheet(
+            'module-ho_slider-front',
+            'modules/' . $this->name . '/views/css/front.css',
+            [
+                'media' => 'all',
+                'priority' => 150,
+            ]
+        );
+        
+        $this->context->controller->registerJavascript(
+            'module-ho_slider-front',
+            'modules/' . $this->name . '/views/js/front.js',
+            [
+                'position' => 'bottom',
+                'priority' => 150,
+            ]
+        );
         
         // Pasar configuración al JavaScript
         Media::addJsDef(array(
