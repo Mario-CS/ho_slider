@@ -858,11 +858,6 @@
     border-left: 4px solid rgba(102, 126, 234, 0.8);
 }
 
-/* ===== Efecto Parallax en el Wrapper ===== */
-.ho-slider-wrapper:hover {
-    transform: translateY(-5px);
-}
-
 /* ===== Contador de Slides ===== */
 .ho-slider-counter {
     position: absolute;
