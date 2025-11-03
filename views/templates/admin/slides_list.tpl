@@ -26,11 +26,11 @@
 <div class="panel">
     <div class="panel-heading ho-slides-panel-heading">
         <div>
-            <i class="icon-list"></i> {l s='Lista de diapositivas' mod='ho_slider'}
+            <i class="icon-list"></i> {l s='Slides list' mod='ho_slider'}
         </div>
         <a href="{$current_index|escape:'html':'UTF-8'}&addSlide=1&token={$token|escape:'html':'UTF-8'}"
             class="btn btn-default pull-right">
-            <i class="icon-plus"></i> {l s='Añadir diapositiva' mod='ho_slider'}
+            <i class="icon-plus"></i> {l s='Add slide' mod='ho_slider'}
         </a>
     </div>
 
@@ -51,12 +51,12 @@
                                 alt="Slide #{$slide.id_slide|escape:'html':'UTF-8'}">
                         {else}
                             <div class="ho-slide-no-image">
-                                <span class="text-muted">{l s='Sin imagen' mod='ho_slider'}</span>
+                                <span class="text-muted">{l s='No image' mod='ho_slider'}</span>
                             </div>
                         {/if}
                     </div>
 
-                    <!-- Información del slide -->
+                    <!-- Slide information -->
                     <div class="ho-slide-info">
                         <h4>
                             Slide #{$slide.id_slide|escape:'html':'UTF-8'}
@@ -68,36 +68,36 @@
                         {/if}
                     </div>
 
-                    <!-- Botones de acción -->
+                    <!-- Action buttons -->
                     <div class="ho-slide-actions">
-                        <!-- Columna Izquierda -->
+                        <!-- Left Column -->
                         <a href="{$current_index|escape:'html':'UTF-8'}&updateSlide=1&id_slide={$slide.id_slide|intval}&token={$token|escape:'html':'UTF-8'}"
-                            class="btn btn-default" title="{l s='Modificar' mod='ho_slider'}">
-                            <i class="icon-edit"></i> {l s='Modificar' mod='ho_slider'}
+                            class="btn btn-default" title="{l s='Edit' mod='ho_slider'}">
+                            <i class="icon-edit"></i> {l s='Edit' mod='ho_slider'}
                         </a>
 
                         <a href="{$current_index|escape:'html':'UTF-8'}&duplicateSlide=1&id_slide={$slide.id_slide|intval}&token={$token|escape:'html':'UTF-8'}"
-                            class="btn btn-default" title="{l s='Duplicar' mod='ho_slider'}">
-                            <i class="icon-copy"></i> {l s='Duplicar' mod='ho_slider'}
+                            class="btn btn-default" title="{l s='Duplicate' mod='ho_slider'}">
+                            <i class="icon-copy"></i> {l s='Duplicate' mod='ho_slider'}
                         </a>
 
-                        <!-- Columna Derecha -->
+                        <!-- Right Column -->
                         {if $slide.active}
                             <a href="{$current_index|escape:'html':'UTF-8'}&statusSlide=1&id_slide={$slide.id_slide|intval}&token={$token|escape:'html':'UTF-8'}"
-                                class="btn btn-success" title="{l s='Activado - Click para desactivar' mod='ho_slider'}">
-                                <i class="icon-check"></i> {l s='Activado' mod='ho_slider'}
+                                class="btn btn-success" title="{l s='Active - Click to deactivate' mod='ho_slider'}">
+                                <i class="icon-check"></i> {l s='Active' mod='ho_slider'}
                             </a>
                         {else}
                             <a href="{$current_index|escape:'html':'UTF-8'}&statusSlide=1&id_slide={$slide.id_slide|intval}&token={$token|escape:'html':'UTF-8'}"
-                                class="btn btn-danger" title="{l s='Desactivado - Click para activar' mod='ho_slider'}">
-                                <i class="icon-remove"></i> {l s='Desactivado' mod='ho_slider'}
+                                class="btn btn-danger" title="{l s='Disabled - Click to activate' mod='ho_slider'}">
+                                <i class="icon-remove"></i> {l s='Disabled' mod='ho_slider'}
                             </a>
                         {/if}
 
                         <a href="{$current_index|escape:'html':'UTF-8'}&deleteSlide=1&id_slide={$slide.id_slide|intval}&token={$token|escape:'html':'UTF-8'}"
-                            class="btn btn-danger" title="{l s='Eliminar' mod='ho_slider'}"
-                            onclick="return confirm('{l s='¿Está seguro de que desea eliminar este slide?' mod='ho_slider' js=1}');">
-                            <i class="icon-trash"></i> {l s='Eliminar' mod='ho_slider'}
+                            class="btn btn-danger" title="{l s='Delete' mod='ho_slider'}"
+                            onclick="return confirm('{l s='Are you sure you want to delete this slide?' mod='ho_slider' js=1}');">
+                            <i class="icon-trash"></i> {l s='Delete' mod='ho_slider'}
                         </a>
                     </div>
                 </div>
@@ -105,7 +105,7 @@
         {else}
             <div class="alert alert-info">
                 <i class="icon-info-circle"></i>
-                {l s='No hay slides creados. Añade tu primer slide usando el botón de arriba.' mod='ho_slider'}
+                {l s='No slides created. Add your first slide using the button above.' mod='ho_slider'}
             </div>
         {/if}
     </div>

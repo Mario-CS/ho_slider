@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module>
 	<name>ho_slider</name>
-	<displayName><![CDATA[Ho Slider]]></displayName>
+	<displayName><![CDATA[Home Slider]]></displayName>
 	<version><![CDATA[1.0.0]]></version>
-	<description><![CDATA[Slider de imágenes responsive para la página principal con gestión completa desde el back office]]></description>
+	<description><![CDATA[Advanced slider module for homepage with 3D effects]]></description>
 	<author><![CDATA[Mario]]></author>
 	<tab><![CDATA[front_office_features]]></tab>
 	<is_configurable>1</is_configurable>

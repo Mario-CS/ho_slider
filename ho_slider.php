@@ -37,7 +37,7 @@ class Ho_slider extends Module
     public function __construct()
     {
         $this->name = 'ho_slider';
-        $this->tab = 'administration';
+        $this->tab = 'front_office_features';
         $this->version = '1.0.0';
         $this->author = 'Mario';
         $this->need_instance = 0;
@@ -49,8 +49,8 @@ class Ho_slider extends Module
 
         parent::__construct();
 
-        $this->displayName = $this->l('Slider home');
-        $this->description = $this->l('Mi modulo de sliders para la home');
+        $this->displayName = $this->l('Home Slider');
+        $this->description = $this->l('Advanced slider module for homepage with 3D effects');
 
         $this->ps_versions_compliancy = array('min' => '8.0', 'max' => '9.0');
     }
@@ -230,7 +230,7 @@ class Ho_slider extends Module
         $fields_form = array(
             'form' => array(
                 'legend' => array(
-                    'title' => $idSlide ? $this->l('Editar Slide') : $this->l('Añadir Slide'),
+                    'title' => $idSlide ? $this->l('Edit Slide') : $this->l('Add Slide'),
                     'icon' => 'icon-picture',
                     'id' => 'add_slide_form'
                 ),
@@ -241,34 +241,34 @@ class Ho_slider extends Module
                         'name' => 'url',
                         'lang' => true,
                         'col' => 6,
-                        'hint' => $this->l('Enlace al hacer clic en el slide (opcional)')
+                        'hint' => $this->l('Link when clicking on the slide (optional)')
                     ),
                     array(
                         'type' => 'file',
-                        'label' => $this->l('Imagen'),
+                        'label' => $this->l('Image'),
                         'name' => 'image',
                         'accept' => '.jpg,.jpeg,.png,.gif,.webp',
-                        'desc' => $this->l('Formatos permitidos: JPG, PNG, GIF, WebP. Tamaño máximo: 20MB. Resolucion recomendada: 1000 x 400px.'),
-                        'required' => !$idSlide // Obligatorio solo para nuevos slides
+                        'desc' => $this->l('Allowed formats: JPG, PNG, GIF, WebP. Max size: 20MB. Recommended resolution: 1000 x 400px.'),
+                        'required' => !$idSlide // Required only for new slides
                     ),
                     array(
                         'type' => 'file',
-                        'label' => $this->l('Imagen Móvil'),
+                        'label' => $this->l('Mobile Image'),
                         'name' => 'image_mobile',
                         'accept' => '.jpg,.jpeg,.png,.gif,.webp',
-                        'desc' => $this->l('Imagen optimizada para móviles (≤768px). Si no se especifica, se usa la imagen principal.'),
+                        'desc' => $this->l('Optimized image for mobile (≤768px). If not specified, the main image will be used.'),
                         'required' => false
                     ),
                     array(
                         'type' => 'switch',
-                        'label' => $this->l('Activo'),
+                        'label' => $this->l('Active'),
                         'name' => 'active',
                         'is_bool' => true,
                         'values' => array(
                             array(
                                 'id' => 'active_on',
                                 'value' => 1,
-                                'label' => $this->l('Sí')
+                                'label' => $this->l('Yes')
                             ),
                             array(
                                 'id' => 'active_off',
@@ -279,13 +279,13 @@ class Ho_slider extends Module
                     )
                 ),
                 'submit' => array(
-                    'title' => $this->l('Guardar'),
+                    'title' => $this->l('Save'),
                     'class' => 'btn btn-default pull-right'
                 ),
                 'buttons' => array(
                     array(
                         'type' => 'button',
-                        'title' => $this->l('Cancelar'),
+                        'title' => $this->l('Cancel'),
                         'icon' => 'process-icon-cancel',
                         'class' => 'btn btn-default',
                         'href' => AdminController::$currentIndex . '&configure=' . $this->name . '&token=' . Tools::getAdminTokenLite('AdminModules')
@@ -294,17 +294,17 @@ class Ho_slider extends Module
             )
         );
 
-        // Si estamos editando, mostrar la imagen actual
+        // If editing, show current image
         if ($idSlide && isset($slide->image[$this->context->language->id])) {
             $image_url = $this->context->link->getBaseLink() . 'img/ho_slider/' . $slide->image[$this->context->language->id];
             $fields_form['form']['input'][] = array(
                 'type' => 'html',
                 'name' => 'current_image',
                 'html_content' => '<div class="form-group">
-                    <label class="control-label col-lg-3">' . $this->l('Imagen actual') . '</label>
+                    <label class="control-label col-lg-3">' . $this->l('Current image') . '</label>
                     <div class="col-lg-9">
                         <img src="' . $image_url . '" class="ho-form-image-preview" />
-                        <p class="help-block">' . $this->l('Sube una nueva imagen para reemplazar la actual') . '</p>
+                        <p class="help-block">' . $this->l('Upload a new image to replace the current one') . '</p>
                     </div>
                 </div>'
             );
@@ -377,12 +377,12 @@ class Ho_slider extends Module
     {
         $idSlide = (int)Tools::getValue('id_slide');
         if (!$idSlide) {
-            return $this->displayError($this->l('ID de slide inválido'));
+            return $this->displayError($this->l('Invalid slide ID'));
         }
 
         $original = new HoSlide($idSlide);
         if (!Validate::isLoadedObject($original)) {
-            return $this->displayError($this->l('Slide no encontrado'));
+            return $this->displayError($this->l('Slide not found'));
         }
 
         $new = new HoSlide();
@@ -409,7 +409,7 @@ class Ho_slider extends Module
             $ext = pathinfo($sourceImage, PATHINFO_EXTENSION);
             $newFilename = uniqid('slide_') . '.' . $ext;
             if (!@copy($uploadDir . $sourceImage, $uploadDir . $newFilename)) {
-                // Si no se pudo copiar, mantén referencia a la misma imagen como fallback
+                // If copy failed, keep reference to same image as fallback
                 $newFilename = $sourceImage;
             }
         }
@@ -424,27 +424,27 @@ class Ho_slider extends Module
             Tools::redirectAdmin(AdminController::$currentIndex . '&configure=' . $this->name . '&conf=3&token=' . Tools::getAdminTokenLite('AdminModules'));
         }
 
-        return $this->displayError($this->l('No se pudo duplicar el slide'));
+        return $this->displayError($this->l('Could not duplicate slide'));
     }
 
     /**
-     * Renderizar formulario de configuración general
+     * Render general settings form
      */
     protected function renderSettingsForm()
     {
         $fields_form = array(
             'form' => array(
                 'legend' => array(
-                    'title' => $this->l('Configuración del Slider'),
+                    'title' => $this->l('Slider Settings'),
                     'icon' => 'icon-cogs'
                 ),
                 'input' => array(
                     array(
                         'type' => 'text',
-                        'label' => $this->l('Velocidad de transición'),
+                        'label' => $this->l('Transition speed'),
                         'name' => 'HO_SLIDER_SPEED',
                         'suffix' => 'ms',
-                        'desc' => $this->l('Tiempo entre slides en milisegundos (ej: 5000 = 5 segundos)'),
+                        'desc' => $this->l('Time between slides in milliseconds (e.g.: 5000 = 5 seconds)'),
                         'col' => 2
                     ),
                     array(
@@ -452,12 +452,12 @@ class Ho_slider extends Module
                         'label' => $this->l('Autoplay'),
                         'name' => 'HO_SLIDER_AUTOPLAY',
                         'is_bool' => true,
-                        'desc' => $this->l('Cambiar automáticamente de slide'),
+                        'desc' => $this->l('Automatically change slides'),
                         'values' => array(
                             array(
                                 'id' => 'autoplay_on',
                                 'value' => 1,
-                                'label' => $this->l('Sí')
+                                'label' => $this->l('Yes')
                             ),
                             array(
                                 'id' => 'autoplay_off',
@@ -468,15 +468,15 @@ class Ho_slider extends Module
                     ),
                     array(
                         'type' => 'switch',
-                        'label' => $this->l('Pausar al pasar el ratón'),
+                        'label' => $this->l('Pause on hover'),
                         'name' => 'HO_SLIDER_PAUSE_ON_HOVER',
                         'is_bool' => true,
-                        'desc' => $this->l('Pausar el autoplay cuando el usuario pasa el ratón por encima'),
+                        'desc' => $this->l('Pause autoplay when user hovers over the slider'),
                         'values' => array(
                             array(
                                 'id' => 'pause_on',
                                 'value' => 1,
-                                'label' => $this->l('Sí')
+                                'label' => $this->l('Yes')
                             ),
                             array(
                                 'id' => 'pause_off',
@@ -487,7 +487,7 @@ class Ho_slider extends Module
                     )
                 ),
                 'submit' => array(
-                    'title' => $this->l('Guardar Configuración'),
+                    'title' => $this->l('Save Settings'),
                     'class' => 'btn btn-default pull-right'
                 )
             )
@@ -519,7 +519,7 @@ class Ho_slider extends Module
         if ($idSlide) {
             $slide = new HoSlide($idSlide);
             if (!Validate::isLoadedObject($slide)) {
-                return $this->displayError($this->l('Slide no encontrado'));
+                return $this->displayError($this->l('Slide not found'));
             }
         } else {
             $slide = new HoSlide();
@@ -568,23 +568,23 @@ class Ho_slider extends Module
             if (!in_array($extension, $allowed_extensions)) {
                 $_GET['addSlide'] = 1;
                 return $this->displayError(
-                    $this->l('Formato de imagen no válido. Use JPG, PNG, GIF o WebP.') . 
-                    ' Archivo: ' . $file['name'] . 
-                    ' Extensión: ' . $extension
+                    $this->l('Invalid image format. Use JPG, PNG, GIF or WebP.') . 
+                    ' File: ' . $file['name'] . 
+                    ' Extension: ' . $extension
                 );
             }
             
-            // Validar que sea realmente una imagen
+            // Validate that it's really an image
             $image_info = @getimagesize($file['tmp_name']);
             if ($image_info === false) {
                 $_GET['addSlide'] = 1;
-                return $this->displayError($this->l('El archivo no es una imagen válida: ') . $file['name']);
+                return $this->displayError($this->l('The file is not a valid image: ') . $file['name']);
             }
             
-            // Validar tamaño (máx 20MB)
+            // Validate size (max 20MB)
             if ($file['size'] > 20 * 1024 * 1024) {
                 $_GET['addSlide'] = 1;
-                return $this->displayError($this->l('La imagen es demasiado grande. Tamaño máximo: 20MB'));
+                return $this->displayError($this->l('The image is too large. Maximum size: 20MB'));
             }
             
             $filename = uniqid('slide_') . '.' . $extension;
@@ -608,37 +608,37 @@ class Ho_slider extends Module
                 $hasImage = true;
             } else {
                 $_GET['addSlide'] = 1;
-                return $this->displayError($this->l('Error al mover el archivo subido: ') . $file['name']);
+                return $this->displayError($this->l('Error moving uploaded file: ') . $file['name']);
             }
         } elseif (!$idSlide) {
-            // Si es nuevo slide, la imagen es obligatoria
+            // If it's a new slide, the image is required
             $_GET['addSlide'] = 1;
-            return $this->displayError($this->l('Debe subir al menos una imagen'));
+            return $this->displayError($this->l('You must upload at least one image'));
         }
         
-        // Procesar imagen móvil (opcional)
+        // Process mobile image (optional)
         if (isset($_FILES['image_mobile']) && $_FILES['image_mobile']['error'] === UPLOAD_ERR_OK) {
             $fileMobile = $_FILES['image_mobile'];
             
-            // Validar extensión
+            // Validate extension
             $extensionMobile = strtolower(pathinfo($fileMobile['name'], PATHINFO_EXTENSION));
             
             if (!in_array($extensionMobile, $allowed_extensions)) {
                 $_GET['addSlide'] = 1;
-                return $this->displayError($this->l('Formato de imagen móvil no válido.'));
+                return $this->displayError($this->l('Invalid mobile image format.'));
             }
             
-            // Validar que sea imagen
+            // Validate that it's an image
             $imageMobileInfo = @getimagesize($fileMobile['tmp_name']);
             if ($imageMobileInfo === false) {
                 $_GET['addSlide'] = 1;
-                return $this->displayError($this->l('El archivo de imagen móvil no es válido.'));
+                return $this->displayError($this->l('The mobile image file is not valid.'));
             }
             
-            // Validar tamaño
+            // Validate size
             if ($fileMobile['size'] > 20 * 1024 * 1024) {
                 $_GET['addSlide'] = 1;
-                return $this->displayError($this->l('La imagen móvil es demasiado grande. Máximo: 20MB'));
+                return $this->displayError($this->l('The mobile image is too large. Maximum: 20MB'));
             }
             
             $filenameMobile = uniqid('slide_') . '_mobile.' . $extensionMobile;
@@ -666,20 +666,20 @@ class Ho_slider extends Module
             Tools::redirectAdmin(AdminController::$currentIndex . '&configure=' . $this->name . '&conf=4&token=' . Tools::getAdminTokenLite('AdminModules'));
         } else {
             $_GET['addSlide'] = 1;
-            // Mostrar errores de validación si existen
+            // Show validation errors if they exist
             $errors = '';
             if (method_exists($slide, 'getErrors')) {
                 $slideErrors = $slide->getErrors();
                 if (!empty($slideErrors)) {
-                    $errors = ' Errores: ' . implode(', ', $slideErrors);
+                    $errors = ' Errors: ' . implode(', ', $slideErrors);
                 }
             }
-            return $this->displayError($this->l('Error al guardar el slide') . $errors);
+            return $this->displayError($this->l('Error saving slide') . $errors);
         }
     }
 
     /**
-     * Eliminar slide
+     * Delete slide
      */
     protected function deleteSlide()
     {
@@ -687,7 +687,7 @@ class Ho_slider extends Module
         $slide = new HoSlide($idSlide);
 
         if (Validate::isLoadedObject($slide)) {
-            // Eliminar imágenes
+            // Delete images
             $upload_dir = _PS_ROOT_DIR_ . '/img/ho_slider/';
             foreach ($slide->image as $image) {
                 if ($image && file_exists($upload_dir . $image)) {
@@ -700,11 +700,11 @@ class Ho_slider extends Module
             }
         }
 
-        return $this->displayError($this->l('Error al eliminar el slide'));
+        return $this->displayError($this->l('Error deleting slide'));
     }
 
     /**
-     * Cambiar estado del slide
+     * Toggle slide status
      */
     protected function toggleStatus()
     {
@@ -718,11 +718,11 @@ class Ho_slider extends Module
             }
         }
 
-        return $this->displayError($this->l('Error al actualizar el estado'));
+        return $this->displayError($this->l('Error updating status'));
     }
 
     /**
-     * Procesar configuración general
+     * Process general settings
      */
     protected function postProcessSettings()
     {
@@ -730,7 +730,7 @@ class Ho_slider extends Module
         Configuration::updateValue('HO_SLIDER_AUTOPLAY', (int)Tools::getValue('HO_SLIDER_AUTOPLAY'));
         Configuration::updateValue('HO_SLIDER_PAUSE_ON_HOVER', (int)Tools::getValue('HO_SLIDER_PAUSE_ON_HOVER'));
 
-        return $this->displayConfirmation($this->l('Configuración guardada correctamente'));
+        return $this->displayConfirmation($this->l('Settings saved successfully'));
     }
 
     /**
