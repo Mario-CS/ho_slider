@@ -27,7 +27,8 @@ Ho_Slider es un módulo avanzado que permite crear y gestionar un slider de imá
 - ✅ **Drag & drop para reordenar** slides fácilmente
 - ✅ **Activar/desactivar** slides individuales con un clic
 - ✅ **Duplicación rápida** de slides existentes
-- ✅ **Configuración del slider**: velocidad, autoplay, pausa en hover
+- ✅ **Configuración del slider**: velocidad, autoplay, pausa en hover, template
+- ✅ **2 Templates disponibles**: Default 3D y Alternative full-width
 - ✅ **Soporte multiidioma** - campos específicos por idioma
 - ✅ **Carga de imágenes doble**: desktop (1200x480px) y mobile (768x512px)
 - ✅ **Validación de formatos**: JPG, PNG, GIF, WebP (hasta 20MB)
@@ -62,6 +63,9 @@ Ho_Slider es un módulo avanzado que permite crear y gestionar un slider de imá
 
 En la sección "Configuración del Slider" puedes ajustar:
 
+- **Slider Template**: Elegir entre dos diseños diferentes
+  - **Default - 3D Modern**: Slider con efectos 3D, slides vecinos visibles, perspectiva y profundidad (max-width: 1200px)
+  - **Alternative - Full width**: Slider ancho completo sin márgenes laterales, ideal para banners hero full-screen
 - **Velocidad de transición**: Tiempo entre slides en milisegundos (por defecto: 5000 = 5 segundos)
 - **Autoplay**: Activar/desactivar cambio automático de slides
 - **Pausar al pasar el ratón**: Pausar autoplay cuando el usuario coloca el cursor sobre el slider
@@ -111,11 +115,13 @@ ho_slider/
 │   └── index.php                # Archivo de seguridad
 ├── views/
 │   ├── css/
-│   │   ├── front.css            # Estilos modernos del slider 3D (973 líneas)
+│   │   ├── front.css            # Estilos slider 3D moderno (973 líneas)
+│   │   ├── front_alternative.css # Estilos slider full-width (nuevo)
 │   │   ├── back.css             # Estilos del panel admin (360+ líneas)
 │   │   └── index.php            # Archivo de seguridad
 │   ├── js/
-│   │   ├── front.js             # JavaScript vanilla del slider (499 líneas)
+│   │   ├── front.js             # JavaScript slider default (499 líneas)
+│   │   ├── front_alternative.js  # JavaScript slider alternative (nuevo)
 │   │   ├── back.js              # JavaScript drag & drop admin (132 líneas)
 │   │   └── index.php            # Archivo de seguridad
 │   ├── img/
@@ -144,6 +150,12 @@ ho_slider/
 - MySQL 5.6 o superior
 
 ## Características Técnicas
+
+### Templates y Estilos
+- **2 Templates incluidos**: Default 3D y Alternative Full-width
+- **Cambio dinámico**: El módulo carga los CSS/JS correspondientes según el template seleccionado
+- **Archivos separados**: Cada template tiene su propio CSS y JavaScript independiente
+- **Sin conflictos**: Solo se carga un template a la vez
 
 ### Imágenes Adaptativas
 - **Desktop**: 1200x480px (ratio 5:2) - Imagen horizontal optimizada
@@ -176,6 +188,30 @@ ho_slider/
 - **Semántica HTML5** correcta
 
 ## Personalización
+
+### Templates Disponibles
+
+El módulo incluye **2 templates** que puedes seleccionar desde el back office:
+
+#### 1. **Default - 3D Modern** (Recomendado)
+- Slider con efectos 3D y perspectiva
+- Slides vecinos visibles con opacidad reducida
+- Max-width: 1200px con márgenes laterales
+- Ideal para: tiendas con diseño clásico/boxed
+- Archivos: `front.css` + `front.js`
+
+#### 2. **Alternative - Full Width**
+- Slider ancho completo sin márgenes
+- Ocupa todo el ancho de la ventana
+- Sin slides vecinos visibles
+- Ideal para: banners hero, tiendas con diseño moderno edge-to-edge
+- Archivos: `front_alternative.css` + `front_alternative.js`
+
+Para cambiar el template:
+1. Ve a la configuración del módulo
+2. Sección "Slider Settings"
+3. Selecciona "Slider Template"
+4. Guarda cambios
 
 ### CSS
 Puedes personalizar los estilos editando `/views/css/front.css`. Las principales variables y clases son:
@@ -251,31 +287,20 @@ $this->l('Your text here')  // En PHP
 - ✅ Multi-tienda compatible
 - ✅ Multi-idioma compatible
 
-## Próximas Características (Roadmap)
-
-- [ ] Editor visual de slides con preview en tiempo real
-- [ ] Efectos de transición personalizables (fade, slide, zoom, flip)
-- [ ] Soporte para videos (YouTube, Vimeo, MP4)
-- [ ] Múltiples sliders por página con posiciones configurables
-- [ ] Programación de slides por fechas y horarios
-- [ ] Estadísticas de clics y conversiones
-- [ ] A/B testing de slides
-- [ ] Importación/exportación masiva de slides
-- [ ] Integración con CDN para imágenes
-
 ## Changelog
-
-### v1.0.0 (2025-11-03)
+### v1.0.0 (2025-11-04)
 - ✅ Lanzamiento inicial completo
-- ✅ Slider 3D moderno con efectos de profundidad
-- ✅ Imágenes adaptativas desktop/mobile con cambio automático
+- ✅ **2 Templates incluidos**: Default 3D y Alternative Full-width
+- ✅ **Slider 3D moderno** con efectos de profundidad y perspectiva (template default)
+- ✅ **Slider full-width** sin márgenes para banners hero (template alternative)
+- ✅ **Imágenes adaptativas** desktop/mobile con cambio automático
 - ✅ Sistema completo de gestión de slides con CRUD
 - ✅ Drag & drop para reordenar slides
 - ✅ Duplicación rápida de slides
 - ✅ Navegación múltiple (flechas, dots, clic en vecinos, teclado, swipe)
 - ✅ Autoplay configurable con pausa en hover
 - ✅ Soporte multiidioma completo
-- ✅ JavaScript vanilla sin dependencias (499 líneas)
+- ✅ JavaScript vanilla sin dependencias
 - ✅ Cumple estándares PrestaShop 8 (validado)
 - ✅ Seguridad mejorada con .htaccess y verificaciones
 - ✅ Optimizaciones de rendimiento y accesibilidad
@@ -304,8 +329,14 @@ Para reportar problemas o solicitar características:
 
 ## Preguntas Frecuentes (FAQ)
 
+**P: ¿Cuál es la diferencia entre los templates Default y Alternative?**  
+R: Default tiene efectos 3D con slides vecinos visibles (max-width 1200px), Alternative es full-width sin márgenes para banners hero modernos.
+
+**P: ¿Puedo personalizar los templates?**  
+R: Sí, edita `front.css` + `front.js` (Default) o `front_alternative.css` + `front_alternative.js` (Alternative).
+
 **P: ¿Cómo cambio los colores del slider?**  
-R: Edita las variables CSS en `/views/css/front.css`, especialmente `--slider-primary`.
+R: Edita las variables CSS en `/views/css/front.css` o `front_alternative.css`, especialmente `--slider-primary`.
 
 **P: ¿Puedo usar solo una imagen para desktop y mobile?**  
 R: Sí, si no subes imagen mobile, se usará la desktop en todos los dispositivos.
@@ -329,12 +360,6 @@ R: Sí, compatible con todos los sistemas de cache de PrestaShop.
 - **Iconos**: FontAwesome (incluido en PrestaShop)
 - **Inspiración**: Modern UI/UX trends 2025
 
-## Changelog
+---
 
-### v1.0.0 (2025-11-03)
-- Lanzamiento inicial
-- Sistema completo de gestión de slides
-- Slider responsive con autoplay
-- Soporte multiidioma
-- Navegación completa (flechas, dots, keyboard, touch)
-- Configuración desde back office
+**¿Te gusta este módulo?** ⭐ Dale una estrella en GitHub y comparte con otros desarrolladores PrestaShop.
