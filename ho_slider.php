@@ -71,6 +71,7 @@ class Ho_slider extends Module
         Configuration::updateValue('HO_SLIDER_SPEED', 5000);
         Configuration::updateValue('HO_SLIDER_AUTOPLAY', true);
         Configuration::updateValue('HO_SLIDER_PAUSE_ON_HOVER', true);
+        Configuration::updateValue('HO_SLIDER_TEMPLATE', 'default'); // default, minimal, modern
 
         return parent::install() &&
             $this->registerHook('header') &&
@@ -85,6 +86,7 @@ class Ho_slider extends Module
         Configuration::deleteByName('HO_SLIDER_SPEED');
         Configuration::deleteByName('HO_SLIDER_AUTOPLAY');
         Configuration::deleteByName('HO_SLIDER_PAUSE_ON_HOVER');
+        Configuration::deleteByName('HO_SLIDER_TEMPLATE');
 
         // Limpiar directorio de imágenes
         $upload_dir = _PS_ROOT_DIR_ . '/img/ho_slider/';
@@ -432,6 +434,26 @@ class Ho_slider extends Module
                 ),
                 'input' => array(
                     array(
+                        'type' => 'select',
+                        'label' => $this->l('Slider Template'),
+                        'name' => 'HO_SLIDER_TEMPLATE',
+                        'desc' => $this->l('Choose the slider design/layout'),
+                        'options' => array(
+                            'query' => array(
+                                array(
+                                    'id' => 'default',
+                                    'name' => $this->l('Default - 3D Modern (side slides visible)')
+                                ),
+                                array(
+                                    'id' => 'alternative',
+                                    'name' => $this->l('Alternative - Full width without margins')
+                                )
+                            ),
+                            'id' => 'id',
+                            'name' => 'name'
+                        )
+                    ),
+                    array(
                         'type' => 'text',
                         'label' => $this->l('Transition speed'),
                         'name' => 'HO_SLIDER_SPEED',
@@ -493,6 +515,7 @@ class Ho_slider extends Module
         $helper->submit_action = 'submitSettings';
 
         $helper->fields_value = array(
+            'HO_SLIDER_TEMPLATE' => Configuration::get('HO_SLIDER_TEMPLATE'),
             'HO_SLIDER_SPEED' => Configuration::get('HO_SLIDER_SPEED'),
             'HO_SLIDER_AUTOPLAY' => Configuration::get('HO_SLIDER_AUTOPLAY'),
             'HO_SLIDER_PAUSE_ON_HOVER' => Configuration::get('HO_SLIDER_PAUSE_ON_HOVER')
@@ -718,6 +741,7 @@ class Ho_slider extends Module
      */
     protected function postProcessSettings()
     {
+        Configuration::updateValue('HO_SLIDER_TEMPLATE', Tools::getValue('HO_SLIDER_TEMPLATE'));
         Configuration::updateValue('HO_SLIDER_SPEED', (int)Tools::getValue('HO_SLIDER_SPEED'));
         Configuration::updateValue('HO_SLIDER_AUTOPLAY', (int)Tools::getValue('HO_SLIDER_AUTOPLAY'));
         Configuration::updateValue('HO_SLIDER_PAUSE_ON_HOVER', (int)Tools::getValue('HO_SLIDER_PAUSE_ON_HOVER'));
@@ -741,19 +765,30 @@ class Ho_slider extends Module
      */
     public function hookHeader()
     {
-        // Registrar CSS y JS del slider
+        // Obtener la plantilla seleccionada
+        $template = Configuration::get('HO_SLIDER_TEMPLATE');
+        if (!$template) {
+            $template = 'default';
+        }
+
+        // Determinar qué archivos CSS/JS cargar según la plantilla
+        $cssFile = ($template === 'alternative') ? 'front_alternative.css' : 'front.css';
+        $jsFile = ($template === 'alternative') ? 'front_alternative.js' : 'front.js';
+
+        // Registrar CSS del slider
         $this->context->controller->registerStylesheet(
             'module-ho_slider-front',
-            'modules/' . $this->name . '/views/css/front.css',
+            'modules/' . $this->name . '/views/css/' . $cssFile,
             [
                 'media' => 'all',
                 'priority' => 150,
             ]
         );
         
+        // Registrar JS del slider
         $this->context->controller->registerJavascript(
             'module-ho_slider-front',
-            'modules/' . $this->name . '/views/js/front.js',
+            'modules/' . $this->name . '/views/js/' . $jsFile,
             [
                 'position' => 'bottom',
                 'priority' => 150,
@@ -783,12 +818,28 @@ class Ho_slider extends Module
             return '';
         }
 
+        // Obtener la plantilla seleccionada
+        $template = Configuration::get('HO_SLIDER_TEMPLATE');
+        if (!$template) {
+            $template = 'default';
+        }
+
+        // Validar que la plantilla existe
+        $validTemplates = array('default', 'alternative');
+        if (!in_array($template, $validTemplates)) {
+            $template = 'default';
+        }
+
         $this->context->smarty->assign(array(
             'slides' => $slides,
             'module_dir' => $this->_path,
-            'image_baseurl' => $this->context->link->getBaseLink() . 'img/ho_slider/'
+            'image_baseurl' => $this->context->link->getBaseLink() . 'img/ho_slider/',
+            'template' => $template
         ));
 
-        return $this->display(__FILE__, 'views/templates/hook/ho_slider.tpl');
+        // Usar la plantilla seleccionada
+        $templateFile = 'views/templates/hook/ho_slider_' . $template . '.tpl';
+        
+        return $this->display(__FILE__, $templateFile);
     }
 }

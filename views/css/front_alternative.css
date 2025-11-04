@@ -1,0 +1,292 @@
+/**
+* 2007-2025 PrestaShop
+*
+* NOTICE OF LICENSE
+*
+* This source file is subject to the Academic Free License (AFL 3.0)
+* that is bundled with this package in the file LICENSE.txt.
+* It is also available through the world-wide-web at this URL:
+* http://opensource.org/licenses/afl-3.0.php
+* If you did not receive a copy of the license and are unable to
+* obtain it through the world-wide-web, please send an email
+* to license@prestashop.com so we can send you a copy immediately.
+*
+* DISCLAIMER
+*
+* Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+* versions in the future. If you wish to customize PrestaShop for your
+* needs please refer to http://www.prestashop.com for more information.
+*
+*  @author    PrestaShop SA <contact@prestashop.com>
+*  @copyright 2007-2025 PrestaShop SA
+*  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+*  International Registered Trademark & Property of PrestaShop SA
+*/
+
+/* ========================================
+   MODERN MINIMAL SLIDER
+   Clean, elegant, and responsive
+   ======================================== */
+
+/* Container Principal */
+.minimal-slider {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    margin: 60px auto;
+    padding: 0;
+    overflow: hidden;
+}
+
+/* Swiper Container */
+.minimal-slider .swiper {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 20px 60px;
+    overflow: hidden;
+}
+
+.minimal-slider .swiper-wrapper {
+    align-items: center;
+}
+
+/* Slide Individual */
+.minimal-slider .swiper-slide {
+    opacity: 1;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    width: auto;
+}
+
+.minimal-slider .swiper-slide-active {
+    opacity: 1;
+    z-index: 10;
+}
+
+/* Slide expandida al hacer clic */
+.minimal-slider .swiper-slide.expanded {
+    width: 600px !important;
+    transform: scale(1) !important;
+    z-index: 100 !important;
+    opacity: 1 !important;
+}
+
+.minimal-slider .swiper-slide.expanded .slide-card {
+    width: 600px;
+}
+
+.minimal-slider .swiper-slide.expanded .slide-image {
+    width: 600px;
+    height: 300px;
+}
+
+/* Card del Slide */
+.slide-card {
+    position: relative;
+    background: transparent;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    transition: all 0.4s ease;
+    cursor: pointer;
+}
+
+.slide-card:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Link Wrapper */
+.slide-link-wrapper {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Imagen del Slide */
+.slide-image {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.slide-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.minimal-slider .swiper-slide-active .slide-image img {
+    transform: scale(1.05);
+}
+
+/* Badge Minimalista */
+.slide-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 50px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #2c3e50;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Contenido del Slide */
+.slide-content {
+    display: none;
+}
+
+.slide-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0 0 12px 0;
+    line-height: 1.3;
+}
+
+.slide-description {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #7f8c8d;
+    margin: 0 0 20px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.slide-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #667eea;
+    text-decoration: none;
+    transition: gap 0.3s ease;
+}
+
+.slide-link:hover {
+    gap: 12px;
+}
+
+.slide-link::after {
+    content: "→";
+    font-size: 18px;
+}
+
+/* Navegación Minimalista */
+.minimal-slider .swiper-button-prev,
+.minimal-slider .swiper-button-next {
+    width: 50px;
+    height: 50px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.minimal-slider .swiper-button-prev:hover,
+.minimal-slider .swiper-button-next:hover {
+    background: #667eea;
+    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.3);
+}
+
+.minimal-slider .swiper-button-prev::after,
+.minimal-slider .swiper-button-next::after {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.minimal-slider .swiper-button-prev:hover::after,
+.minimal-slider .swiper-button-next:hover::after {
+    color: #fff;
+}
+
+/* Paginación Minimalista */
+.minimal-slider .swiper-pagination {
+    bottom: 20px !important;
+}
+
+.minimal-slider .swiper-pagination-bullet {
+    width: 8px;
+    height: 8px;
+    background: #bdc3c7;
+    opacity: 1;
+    transition: all 0.3s ease;
+}
+
+.minimal-slider .swiper-pagination-bullet-active {
+    width: 24px;
+    border-radius: 4px;
+    background: #667eea;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .slide-image {
+        height: 400px;
+    }
+
+    .slide-title {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .minimal-slider {
+        margin: 40px auto;
+    }
+
+    .minimal-slider .swiper {
+        padding: 20px 10px 50px;
+    }
+
+    .slide-image {
+        height: 300px;
+    }
+
+    .slide-content {
+        padding: 20px;
+    }
+
+    .slide-title {
+        font-size: 20px;
+    }
+
+    .slide-description {
+        font-size: 14px;
+    }
+
+    .minimal-slider .swiper-button-prev,
+    .minimal-slider .swiper-button-next {
+        display: none;
+    }
+
+    .minimal-slider .swiper-slide {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@media (max-width: 480px) {
+    .slide-image {
+        height: 250px;
+    }
+
+    .slide-badge {
+        top: 15px;
+        right: 15px;
+        padding: 6px 12px;
+        font-size: 10px;
+    }
+}
