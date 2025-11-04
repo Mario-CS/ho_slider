@@ -446,7 +446,7 @@ class Ho_slider extends Module
                                 ),
                                 array(
                                     'id' => 'alternative',
-                                    'name' => $this->l('Alternative - Full width without margins')
+                                    'name' => $this->l('Alternative (beta) - Full width without margins ')
                                 )
                             ),
                             'id' => 'id',

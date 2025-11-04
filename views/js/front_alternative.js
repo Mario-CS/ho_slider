@@ -46,8 +46,8 @@
         const swiper = new Swiper('.minimal-slider .swiper', {
             effect: 'slide',
             speed: 800,
-            slidesPerView: 1.2,
-            spaceBetween: 30,
+            slidesPerView: 1,
+            spaceBetween: 20,
             centeredSlides: true,
             loop: true,
             watchSlidesProgress: true,
@@ -64,28 +64,16 @@
             },
 
             breakpoints: {
-                480: {
-                    slidesPerView: 1.5,
-                    spaceBetween: 20,
-                },
-                640: {
-                    slidesPerView: 2,
-                    spaceBetween: 25,
-                },
-                768: {
-                    slidesPerView: 2.5,
-                    spaceBetween: 30,
-                },
                 1024: {
-                    slidesPerView: 2.5,
+                    slidesPerView: 3,
                     spaceBetween: 30,
                 },
                 1280: {
-                    slidesPerView: 2.5,
+                    slidesPerView: 3,
                     spaceBetween: 35,
                 },
                 1400: {
-                    slidesPerView: 2.5,
+                    slidesPerView: 3,
                     spaceBetween: 40,
                 },
             },
@@ -97,19 +85,24 @@
             }
         });
 
-        // Expandir slide al hacer clic (primer clic expande, segundo clic navega)
+        // Expandir slide al hacer clic (solo en pantallas grandes >= 1024px)
         const slides = swiperContainer.querySelectorAll('.swiper-slide');
         slides.forEach(slide => {
             const link = slide.querySelector('a');
 
             if (link) {
                 link.addEventListener('click', function (e) {
+                    // En dispositivos pequeños, permitir navegación directa
+                    if (window.innerWidth < 1024) {
+                        return; // Permitir que el enlace funcione normalmente
+                    }
+
                     // Si la slide ya está expandida, permitir navegación
                     if (slide.classList.contains('expanded')) {
                         return; // Permitir que el enlace funcione
                     }
 
-                    // Primer clic: prevenir navegación y expandir
+                    // Primer clic: prevenir navegación y expandir (solo en desktop)
                     e.preventDefault();
                     e.stopPropagation();
 
@@ -121,9 +114,9 @@
                 });
             }
 
-            // Quitar expansión al hacer clic fuera
+            // Quitar expansión al hacer clic fuera (solo desktop)
             document.addEventListener('click', function (e) {
-                if (!slide.contains(e.target)) {
+                if (window.innerWidth >= 1024 && !slide.contains(e.target)) {
                     slide.classList.remove('expanded');
                 }
             });
